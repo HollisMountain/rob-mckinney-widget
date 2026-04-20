@@ -649,13 +649,33 @@
 
     /* responsive */
     @media (max-width: 760px) {
-      .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
-      .sidebar { border-right: none; border-bottom: 1px solid var(--border2); }
+      body { overflow: auto; }
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        min-height: 100vh;
+        /* chat first on mobile */
+        display: flex;
+        flex-direction: column;
+      }
+      /* put chat panel first visually */
+      .chat { order: -1; min-height: 100svh; display: flex; flex-direction: column; }
+      .sidebar { order: 1; border-right: none; border-top: 1px solid var(--border2); }
+      /* hide decorative mountain bg on mobile to save space */
+      .chat-panorama { display: none; }
+      /* hide sidebar mountain behind fold */
+      .sidebar-mountain { height: 140px; }
+      .hc-brand { display: none; } /* already visible in chat header badge */
+      /* compact sidebar */
       .stat-grid { grid-template-columns: repeat(4,1fr); }
       .starters-grid { grid-template-columns: 1fr; }
-      .chat-header { flex-direction: column; align-items: flex-start; }
-      #messages, .starters-area, .input-wrap { padding-left: 18px; padding-right: 18px; }
-      .chat-header { padding: 16px 18px 12px; }
+      .chat-header { flex-direction: row; align-items: center; padding: 14px 18px 12px; }
+      .chat-header h1 { font-size: 16px; }
+      .chat-header p { font-size: 12px; margin-top: 2px; }
+      #messages { padding: 14px 18px; flex: 1; }
+      .starters-area { padding-left: 18px; padding-right: 18px; }
+      .input-wrap { padding: 0 18px 18px; }
     }
   </style>
 </head>
@@ -835,23 +855,14 @@
       </g>
     </svg>
 
-    <!-- brand strip -->
-    <div class="chat-brand-strip">
-      <div class="chat-brand-left">
-        <span class="chat-brand-name">⛰ High Camp<sup>AI</sup></span>
-        <div class="chat-brand-sep"></div>
-        <span class="chat-brand-tag">Gen AI · Career Intelligence</span>
-      </div>
-      <div class="chat-brand-right">
-        <div class="chat-brand-dot"></div>
-        online
-      </div>
-    </div>
-
     <div class="chat-header">
       <div>
         <h1>Is Rob right for <em>your role?</em></h1>
         <p>A Gen AI leader &amp; executive — ask me anything about his fit for your role.</p>
+      </div>
+      <div class="model-badge">
+        <div class="model-badge-dot"></div>
+        High Camp · online
       </div>
     </div>
 
@@ -985,7 +996,7 @@
       const data = await res.json();
       typing.remove();
       if (data.error) {
-        renderMessage('bot', 'Sorry, something went wrong. Please try again.');
+        renderMessage('bot', 'Error: ' + data.error);
       } else {
         history.push({ role: 'assistant', content: data.content });
         renderMessage('bot', data.content);
