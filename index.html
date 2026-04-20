@@ -1019,7 +1019,7 @@
     const typing = renderTyping();
     await new Promise(r => setTimeout(r, 850));
     typing.remove();
-    const greeting = "Hi there! I'm an AI trained on Rob McKinney's full career background — 30 years of product, technology, and operational leadership across startups, Fortune 150 companies, and healthcare.\n\nPaste a job description or tell me about the role you're hiring for, and I'll walk you through exactly why Rob could be the person you're looking for.";
+    const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
     history.push({ role: 'assistant', content: greeting });
     renderMessage('bot', greeting);
   })();
