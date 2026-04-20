@@ -161,6 +161,34 @@ exports.handler = async (event) => {
   try {
     const { messages } = JSON.parse(event.body);
 
+    // If the latest user message contains a URL, fetch and inject its content
+    const augmentedMessages = [...messages];
+    const lastMsg = augmentedMessages[augmentedMessages.length - 1];
+    if (lastMsg && lastMsg.role === "user") {
+      const urlMatch = lastMsg.content.match(/https?:\/\/[^\s]+/);
+      if (urlMatch) {
+        try {
+          const pageRes = await fetch(urlMatch[0], {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; HighCampBot/1.0)" },
+            signal: AbortSignal.timeout(8000),
+          });
+          const html = await pageRes.text();
+          // Strip HTML tags and collapse whitespace
+          const text = html
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 6000);
+          lastMsg.content = `${lastMsg.content}\n\n[Page content fetched from ${urlMatch[0]}]:\n${text}`;
+          console.log("Fetched URL:", urlMatch[0], "— chars:", text.length);
+        } catch (fetchErr) {
+          console.log("URL fetch failed:", fetchErr.message);
+        }
+      }
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -172,7 +200,7 @@ exports.handler = async (event) => {
         model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: SYSTEM_PROMPT,
-        messages,
+        messages: augmentedMessages,
       }),
     });
 
