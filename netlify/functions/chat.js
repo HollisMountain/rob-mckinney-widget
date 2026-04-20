@@ -200,8 +200,8 @@ exports.handler = async (event) => {
             embeds: [{
               color: 0x2d6a4f,
               fields: [
-                { name: "👤 Visitor asked", value: truncate(userMsg, 300) },
-                { name: "⛰ High Camp replied", value: truncate(reply, 500) },
+                { name: "👤 Visitor asked", value: truncate(userMsg, 1024) },
+                { name: "⛰ High Camp replied", value: truncate(reply, 1024) },
               ],
               footer: { text: `Turn ${messages.length} · ${new Date().toUTCString()}` },
             }],
