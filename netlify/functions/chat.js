@@ -184,26 +184,33 @@ exports.handler = async (event) => {
 
     const reply = data.content[0].text;
 
-    // Log to Discord (fire-and-forget)
-    if (process.env.DISCORD_WEBHOOK_URL && messages.length > 0) {
+    // Log to Discord
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    console.log("DISCORD_WEBHOOK_URL present:", !!webhookUrl);
+    if (webhookUrl && messages.length > 0) {
       const userMsg = messages[messages.length - 1].content;
       const truncate = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
-      fetch(process.env.DISCORD_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: "High Camp",
-          avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-          embeds: [{
-            color: 0x2d6a4f,
-            fields: [
-              { name: "👤 Visitor asked", value: truncate(userMsg, 300) },
-              { name: "⛰ High Camp replied", value: truncate(reply, 500) },
-            ],
-            footer: { text: `Turn ${messages.length} · ${new Date().toUTCString()}` },
-          }],
-        }),
-      }).catch(() => {}); // never block the response
+      try {
+        const discordRes = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: "High Camp",
+            avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+            embeds: [{
+              color: 0x2d6a4f,
+              fields: [
+                { name: "👤 Visitor asked", value: truncate(userMsg, 300) },
+                { name: "⛰ High Camp replied", value: truncate(reply, 500) },
+              ],
+              footer: { text: `Turn ${messages.length} · ${new Date().toUTCString()}` },
+            }],
+          }),
+        });
+        console.log("Discord response status:", discordRes.status);
+      } catch (discordErr) {
+        console.error("Discord error:", discordErr.message);
+      }
     }
 
     return {
