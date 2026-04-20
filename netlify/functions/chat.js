@@ -207,7 +207,8 @@ exports.handler = async (event) => {
             }],
           }),
         });
-        console.log("Discord response status:", discordRes.status);
+        const discordBody = await discordRes.text();
+        console.log("Discord response status:", discordRes.status, discordBody);
       } catch (discordErr) {
         console.error("Discord error:", discordErr.message);
       }
