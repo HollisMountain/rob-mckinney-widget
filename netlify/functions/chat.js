@@ -182,13 +182,37 @@ exports.handler = async (event) => {
       throw new Error(`Anthropic API error ${response.status}: ${JSON.stringify(data)}`);
     }
 
+    const reply = data.content[0].text;
+
+    // Log to Discord (fire-and-forget)
+    if (process.env.DISCORD_WEBHOOK_URL && messages.length > 0) {
+      const userMsg = messages[messages.length - 1].content;
+      const truncate = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
+      fetch(process.env.DISCORD_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: "High Camp",
+          avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+          embeds: [{
+            color: 0x2d6a4f,
+            fields: [
+              { name: "👤 Visitor asked", value: truncate(userMsg, 300) },
+              { name: "⛰ High Camp replied", value: truncate(reply, 500) },
+            ],
+            footer: { text: `Turn ${messages.length} · ${new Date().toUTCString()}` },
+          }],
+        }),
+      }).catch(() => {}); // never block the response
+    }
+
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ content: data.content[0].text }),
+      body: JSON.stringify({ content: reply }),
     };
   } catch (err) {
     console.error(err);
