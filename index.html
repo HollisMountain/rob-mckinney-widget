@@ -530,16 +530,30 @@
     .msg-bubble p + p { margin-top: 8px; }
     .msg-bubble strong { color: var(--text); font-weight: 600; }
 
-    /* typing */
-    .typing-dots { display: inline-flex; gap: 4px; align-items: center; }
-    .typing-dots span {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--pine-mid); opacity: 0.5;
-      animation: tdot 1.2s infinite;
+    /* typing / status */
+    .typing-status {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; letter-spacing: 0.04em;
+      color: var(--pine-mid);
     }
-    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes tdot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px);opacity:1} }
+    .typing-status .pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--pine-mid);
+      box-shadow: 0 0 0 0 rgba(45,106,79,0.6);
+      animation: tpulse 1.4s ease-out infinite;
+      flex-shrink: 0;
+    }
+    .typing-status .label {
+      opacity: 0; transform: translateY(2px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .typing-status .label.in { opacity: 1; transform: translateY(0); }
+    @keyframes tpulse {
+      0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.55); transform: scale(1); }
+      70%  { box-shadow: 0 0 0 8px rgba(45,106,79,0);  transform: scale(1.05); }
+      100% { box-shadow: 0 0 0 0 rgba(45,106,79,0);    transform: scale(1); }
+    }
 
     /* starters */
     .starters-area {
@@ -952,7 +966,7 @@
     return msg;
   }
 
-  function renderTyping() {
+  function renderTyping(phases) {
     const msg = document.createElement('div');
     msg.className = 'msg bot'; msg.id = 'typing';
 
@@ -968,7 +982,7 @@
 
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
-    bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    bubble.innerHTML = '<div class="typing-status"><span class="pulse"></span><span class="label"></span></div>';
 
     content.appendChild(meta);
     content.appendChild(bubble);
@@ -976,6 +990,34 @@
     msg.appendChild(content);
     messagesEl.appendChild(msg);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    // Cycle through status phases. Last phase sticks until response arrives.
+    const labelEl = bubble.querySelector('.label');
+    const steps = phases && phases.length ? phases : [
+      'Researching background',
+      'Matching experience to role',
+      'Running fit analysis',
+      'Drafting response',
+    ];
+    let i = 0;
+    const setLabel = (txt) => {
+      labelEl.classList.remove('in');
+      setTimeout(() => {
+        labelEl.textContent = txt + '…';
+        labelEl.classList.add('in');
+      }, 180);
+    };
+    setLabel(steps[0]);
+    msg._interval = setInterval(() => {
+      if (i < steps.length - 1) {
+        i++;
+        setLabel(steps[i]);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+    }, 1800);
+
+    const origRemove = msg.remove.bind(msg);
+    msg.remove = () => { clearInterval(msg._interval); origRemove(); };
     return msg;
   }
 
@@ -986,7 +1028,11 @@
     history.push({ role: 'user', content: text });
     renderMessage('user', text);
     inputEl.value = ''; autoResize();
-    const typing = renderTyping();
+    const hasUrl = /https?:\/\/\S+/i.test(text);
+    const phases = hasUrl
+      ? ['Fetching link', 'Reading page content', 'Matching to Rob\u2019s experience', 'Drafting response']
+      : ['Researching background', 'Matching experience to role', 'Running fit analysis', 'Drafting response'];
+    const typing = renderTyping(phases);
     try {
       const res = await fetch('/.netlify/functions/chat', {
         method: 'POST',
