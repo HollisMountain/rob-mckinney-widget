@@ -1,3 +1,26 @@
+// =========================================================================
+// High Camp — Netlify Function
+// Handles Claude API calls, URL fetching, rate limiting, and Discord logging.
+// =========================================================================
+
+// ── Config constants ─────────────────────────────────────────────────────
+const MODEL                  = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
+const MAX_TOKENS             = 1024;
+const MAX_URL_CONTENT_CHARS  = 6000;
+const MAX_URL_CONTENT_BYTES  = 2 * 1024 * 1024;   // 2 MB hard limit
+const URL_FETCH_TIMEOUT_MS   = 8000;
+const MAX_HISTORY_MESSAGES   = 20;
+const MAX_MESSAGE_LENGTH     = 4000;
+const DISCORD_FIELD_CAP      = 1024;
+const RATE_LIMIT_PER_MIN     = 10;
+const RATE_LIMIT_WINDOW_MS   = 60 * 1000;
+
+// Allowed origins for CORS. Add your custom domain here when live.
+const ALLOWED_ORIGINS = new Set([
+  "https://benevolent-starlight-084f6e.netlify.app",
+]);
+
+// ── System prompt ────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are High Camp, a career intelligence assistant with deep knowledge of Rob McKinney's background. Your job is to help potential employers objectively explore whether Rob is a strong fit for their role. You present Rob's experience accurately and specifically — letting the facts speak for themselves rather than advocating or overselling.
 
 ## Rob McKinney — Background
@@ -141,54 +164,194 @@ When an employer shares a job description, role title, or company context:
 
 Start each conversation with a brief, neutral greeting and ask what role they're exploring.`;
 
+// ── Rate limiting (in-memory, per warm instance) ─────────────────────────
+const rateLimitMap = new Map();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip) || { count: 0, windowStart: now };
+  if (now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+    record.count = 1;
+    record.windowStart = now;
+  } else {
+    record.count++;
+  }
+  rateLimitMap.set(ip, record);
+  // Prune stale entries periodically
+  if (rateLimitMap.size > 1000) {
+    const cutoff = now - RATE_LIMIT_WINDOW_MS * 2;
+    for (const [k, v] of rateLimitMap) {
+      if (v.windowStart < cutoff) rateLimitMap.delete(k);
+    }
+  }
+  return record.count > RATE_LIMIT_PER_MIN;
+}
+
+// ── SSRF protection ──────────────────────────────────────────────────────
+function isPrivateOrUnsafeHost(hostname) {
+  const h = hostname.toLowerCase();
+  // IPv4 private / loopback / link-local / metadata
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^169\.254\./.test(h)) return true;
+  if (/^0\./.test(h)) return true;
+  // Hostnames
+  if (h === "localhost" || h.endsWith(".localhost")) return true;
+  if (h === "metadata.google.internal" || h.startsWith("metadata.")) return true;
+  // IPv6 loopback / link-local / unique-local
+  if (h === "::1" || h === "[::1]") return true;
+  if (/^\[?fe80:/i.test(h)) return true;
+  if (/^\[?fc00:/i.test(h) || /^\[?fd/i.test(h)) return true;
+  return false;
+}
+
+function isSafeUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    if (isPrivateOrUnsafeHost(u.hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── CORS helpers ─────────────────────────────────────────────────────────
+function corsHeaders(origin) {
+  const allowed = ALLOWED_ORIGINS.has(origin);
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+// ── URL content fetching (with size guard) ───────────────────────────────
+async function fetchUrlContent(urlStr) {
+  if (!isSafeUrl(urlStr)) {
+    return { ok: false, reason: "Unsafe URL rejected" };
+  }
+  const res = await fetch(urlStr, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; HighCampBot/1.0)" },
+    signal: AbortSignal.timeout(URL_FETCH_TIMEOUT_MS),
+    redirect: "follow",
+  });
+  const contentLength = Number(res.headers.get("content-length") || 0);
+  if (contentLength > MAX_URL_CONTENT_BYTES) {
+    return { ok: false, reason: `Content too large (${contentLength} bytes)` };
+  }
+  // Check redirect target is still safe (URL class resolves redirect URL)
+  if (!isSafeUrl(res.url)) {
+    return { ok: false, reason: "Redirected to unsafe URL" };
+  }
+  const html = await res.text();
+  const text = html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_URL_CONTENT_CHARS);
+  return { ok: true, text };
+}
+
+// ── Discord logging (fire-and-forget) ────────────────────────────────────
+function logToDiscord(userMsg, reply, turn) {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) return;
+  const truncate = (s, n) => (s.length > n ? s.slice(0, n) + "…" : s);
+  fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: "High Camp",
+      avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+      embeds: [{
+        color: 0x2d6a4f,
+        fields: [
+          { name: "👤 Visitor asked",    value: truncate(userMsg, DISCORD_FIELD_CAP) },
+          { name: "⛰ High Camp replied", value: truncate(reply,   DISCORD_FIELD_CAP) },
+        ],
+        footer: { text: `Turn ${turn} · ${new Date().toUTCString()}` },
+      }],
+    }),
+  }).catch(err => console.error("Discord webhook error:", err.message));
+}
+
+// ── Input validation ─────────────────────────────────────────────────────
+function validateMessages(messages) {
+  if (!Array.isArray(messages)) return "messages must be an array";
+  if (messages.length === 0) return "messages array is empty";
+  if (messages.length > MAX_HISTORY_MESSAGES * 2) {
+    return `history too long (max ${MAX_HISTORY_MESSAGES} turns)`;
+  }
+  for (const m of messages) {
+    if (typeof m?.content !== "string") return "malformed message";
+    if (m.content.length > MAX_MESSAGE_LENGTH) {
+      return `message too long (max ${MAX_MESSAGE_LENGTH} chars)`;
+    }
+    if (m.role !== "user" && m.role !== "assistant") {
+      return "invalid message role";
+    }
+  }
+  return null;
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────
 exports.handler = async (event) => {
+  const origin = event.headers?.origin || event.headers?.Origin || "";
+  const headers = corsHeaders(origin);
+
   if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers, body: "" };
+  }
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, headers, body: "Method Not Allowed" };
+  }
+
+  // Rate limiting (per client IP)
+  const ip = (event.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+  if (isRateLimited(ip)) {
     return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: "",
+      statusCode: 429,
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Too many requests. Please wait a minute." }),
     };
   }
 
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
-
   try {
-    const { messages } = JSON.parse(event.body);
+    const { messages } = JSON.parse(event.body || "{}");
 
-    // If the latest user message contains a URL, fetch and inject its content
-    const augmentedMessages = [...messages];
+    const validationErr = validateMessages(messages);
+    if (validationErr) {
+      return {
+        statusCode: 400,
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ error: validationErr }),
+      };
+    }
+
+    // If latest user message contains a URL, fetch & inject
+    const augmentedMessages = messages.map(m => ({ ...m }));
     const lastMsg = augmentedMessages[augmentedMessages.length - 1];
-    if (lastMsg && lastMsg.role === "user") {
+    if (lastMsg?.role === "user") {
       const urlMatch = lastMsg.content.match(/https?:\/\/[^\s]+/);
       if (urlMatch) {
-        try {
-          const pageRes = await fetch(urlMatch[0], {
-            headers: { "User-Agent": "Mozilla/5.0 (compatible; HighCampBot/1.0)" },
-            signal: AbortSignal.timeout(8000),
-          });
-          const html = await pageRes.text();
-          // Strip HTML tags and collapse whitespace
-          const text = html
-            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-            .replace(/<[^>]+>/g, " ")
-            .replace(/\s+/g, " ")
-            .trim()
-            .slice(0, 6000);
-          lastMsg.content = `${lastMsg.content}\n\n[Page content fetched from ${urlMatch[0]}]:\n${text}`;
-          console.log("Fetched URL:", urlMatch[0], "— chars:", text.length);
-        } catch (fetchErr) {
-          console.log("URL fetch failed:", fetchErr.message);
+        const result = await fetchUrlContent(urlMatch[0]).catch(e => ({
+          ok: false, reason: e.message,
+        }));
+        if (result.ok) {
+          lastMsg.content = `${lastMsg.content}\n\n[Page content fetched from ${urlMatch[0]}]:\n${result.text}`;
+        } else {
+          console.log("URL fetch skipped:", result.reason);
         }
       }
     }
 
+    // Call Claude — system prompt is cached for 5 min via ephemeral cache_control
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -197,64 +360,37 @@ exports.handler = async (event) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system: [{
+          type: "text",
+          text: SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        }],
         messages: augmentedMessages,
       }),
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       throw new Error(`Anthropic API error ${response.status}: ${JSON.stringify(data)}`);
     }
 
     const reply = data.content[0].text;
 
-    // Log to Discord
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    console.log("DISCORD_WEBHOOK_URL present:", !!webhookUrl);
-    if (webhookUrl && messages.length > 0) {
-      const userMsg = messages[messages.length - 1].content;
-      const truncate = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
-      try {
-        const discordRes = await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: "High Camp",
-            avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-            embeds: [{
-              color: 0x2d6a4f,
-              fields: [
-                { name: "👤 Visitor asked", value: truncate(userMsg, 1024) },
-                { name: "⛰ High Camp replied", value: truncate(reply, 1024) },
-              ],
-              footer: { text: `Turn ${messages.length} · ${new Date().toUTCString()}` },
-            }],
-          }),
-        });
-        const discordBody = await discordRes.text();
-        console.log("Discord response status:", discordRes.status, discordBody);
-      } catch (discordErr) {
-        console.error("Discord error:", discordErr.message);
-      }
-    }
+    // Log to Discord asynchronously — don't block the response
+    logToDiscord(messages[messages.length - 1].content, reply, messages.length);
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ content: reply }),
     };
   } catch (err) {
-    console.error(err);
+    console.error("Handler error:", err);
     return {
       statusCode: 500,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ error: err.message || String(err) }),
     };
   }
