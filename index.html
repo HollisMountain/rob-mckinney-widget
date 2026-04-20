@@ -1062,9 +1062,7 @@
   document.querySelectorAll('.starter').forEach(b => b.addEventListener('click', () => send(b.textContent.trim())));
 
   (async () => {
-    const typing = renderTyping();
-    await new Promise(r => setTimeout(r, 850));
-    typing.remove();
+    await new Promise(r => setTimeout(r, 300));
     const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
     history.push({ role: 'assistant', content: greeting });
     renderMessage('bot', greeting);
