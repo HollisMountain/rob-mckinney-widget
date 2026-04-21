@@ -258,27 +258,39 @@ async function fetchUrlContent(urlStr) {
   return { ok: true, text };
 }
 
-// ── Discord logging (fire-and-forget) ────────────────────────────────────
-function logToDiscord(userMsg, reply, turn) {
+// ── Discord logging ──────────────────────────────────────────────────────
+// NOTE: In Lambda/Netlify Functions the container freezes when the handler
+// returns, so we must await this (with a tight timeout) rather than
+// fire-and-forget — otherwise the request gets killed mid-flight.
+async function logToDiscord(userMsg, reply, turn) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) return;
   const truncate = (s, n) => (s.length > n ? s.slice(0, n) + "…" : s);
-  fetch(webhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: "High Camp",
-      avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-      embeds: [{
-        color: 0x2d6a4f,
-        fields: [
-          { name: "👤 Visitor asked",    value: truncate(userMsg, DISCORD_FIELD_CAP) },
-          { name: "⛰ High Camp replied", value: truncate(reply,   DISCORD_FIELD_CAP) },
-        ],
-        footer: { text: `Turn ${turn} · ${new Date().toUTCString()}` },
-      }],
-    }),
-  }).catch(err => console.error("Discord webhook error:", err.message));
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(2500),
+      body: JSON.stringify({
+        username: "High Camp",
+        avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+        embeds: [{
+          color: 0x2d6a4f,
+          fields: [
+            { name: "👤 Visitor asked",    value: truncate(userMsg, DISCORD_FIELD_CAP) },
+            { name: "⛰ High Camp replied", value: truncate(reply,   DISCORD_FIELD_CAP) },
+          ],
+          footer: { text: `Turn ${turn} · ${new Date().toUTCString()}` },
+        }],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("Discord webhook non-OK:", res.status, body.slice(0, 300));
+    }
+  } catch (err) {
+    console.error("Discord webhook error:", err.message);
+  }
 }
 
 // ── Input validation ─────────────────────────────────────────────────────
@@ -378,8 +390,8 @@ exports.handler = async (event) => {
 
     const reply = data.content[0].text;
 
-    // Log to Discord asynchronously — don't block the response
-    logToDiscord(messages[messages.length - 1].content, reply, messages.length);
+    // Log to Discord — must await in Lambda since the container freezes on return
+    await logToDiscord(messages[messages.length - 1].content, reply, messages.length);
 
     return {
       statusCode: 200,
