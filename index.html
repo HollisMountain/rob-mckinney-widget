@@ -1030,9 +1030,15 @@
     renderMessage('user', text);
     inputEl.value = ''; autoResize();
     const hasUrl = /https?:\/\/\S+/i.test(text);
-    const phases = hasUrl
-      ? ['Fetching link', 'Reading page content', 'Matching to Rob\u2019s experience', 'Drafting response']
-      : ['Researching background', 'Matching experience to role', 'Running fit analysis', 'Drafting response'];
+    const isRoleQuery = /\b(role|job|position|hiring|hire|fit|cpo|coo|cto|ceo|vp|director|manager|company|startup|description)\b/i.test(text);
+    let phases;
+    if (hasUrl) {
+      phases = ['Fetching link', 'Reading page content', 'Matching to Rob\u2019s experience', 'Drafting response'];
+    } else if (isRoleQuery) {
+      phases = ['Reviewing background', 'Matching experience to role', 'Drafting response'];
+    } else {
+      phases = ['Reviewing background', 'Pulling relevant context', 'Drafting response'];
+    }
     const typing = renderTyping(phases);
     try {
       const res = await fetch('/.netlify/functions/chat', {
