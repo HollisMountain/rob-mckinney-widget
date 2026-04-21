@@ -267,8 +267,10 @@ async function logToDiscord(userMsg, reply, turn) {
   if (!webhookUrl) return;
   const clean = (s) => (s && String(s).trim()) || "(empty)";
 
-  // Split a long string into ≤DISCORD_FIELD_CAP-char chunks, preferring
-  // paragraph/sentence breaks so chunks don't cut mid-word.
+  // Discord limits: 1024 chars/field, 6000 chars total per embed, 25 fields.
+  // Budget ~4800 chars of content per embed to stay safely under 6000.
+  const EMBED_BUDGET = 4800;
+
   const chunk = (s, max) => {
     const out = [];
     let rest = s;
@@ -284,39 +286,58 @@ async function logToDiscord(userMsg, reply, turn) {
     return out;
   };
 
-  const userChunks  = chunk(clean(userMsg), DISCORD_FIELD_CAP);
-  const replyChunks = chunk(clean(reply),   DISCORD_FIELD_CAP);
-  const fields = [];
-  userChunks.forEach((c, i) => fields.push({
-    name: userChunks.length > 1 ? `👤 Visitor asked (${i + 1}/${userChunks.length})` : "👤 Visitor asked",
-    value: c,
-  }));
-  replyChunks.forEach((c, i) => fields.push({
-    name: replyChunks.length > 1 ? `⛰ High Camp replied (${i + 1}/${replyChunks.length})` : "⛰ High Camp replied",
-    value: c,
-  }));
+  // Build a list of labeled chunks, then pack into embeds under the budget.
+  const pieces = [
+    ...chunk(clean(userMsg), DISCORD_FIELD_CAP).map((v, i, a) => ({
+      name: a.length > 1 ? `👤 Visitor asked (${i + 1}/${a.length})` : "👤 Visitor asked",
+      value: v,
+    })),
+    ...chunk(clean(reply), DISCORD_FIELD_CAP).map((v, i, a) => ({
+      name: a.length > 1 ? `⛰ High Camp replied (${i + 1}/${a.length})` : "⛰ High Camp replied",
+      value: v,
+    })),
+  ];
 
-  try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(2500),
-      body: JSON.stringify({
-        username: "High Camp",
-        avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-        embeds: [{
-          color: 0x2d6a4f,
-          fields: fields.slice(0, 25),  // Discord hard cap: 25 fields
-          footer: { text: `Turn ${turn} · ${new Date().toUTCString()}` },
-        }],
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("Discord webhook non-OK:", res.status, body.slice(0, 300));
+  const embeds = [];
+  let current = [], currentSize = 0;
+  for (const p of pieces) {
+    const pSize = p.name.length + p.value.length;
+    if (current.length && (currentSize + pSize > EMBED_BUDGET || current.length >= 25)) {
+      embeds.push(current);
+      current = []; currentSize = 0;
     }
-  } catch (err) {
-    console.error("Discord webhook error:", err.message);
+    current.push(p); currentSize += pSize;
+  }
+  if (current.length) embeds.push(current);
+
+  const stamp = new Date().toUTCString();
+  for (let i = 0; i < embeds.length; i++) {
+    try {
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(2500),
+        body: JSON.stringify({
+          username: "High Camp",
+          avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+          embeds: [{
+            color: 0x2d6a4f,
+            fields: embeds[i],
+            footer: {
+              text: embeds.length > 1
+                ? `Turn ${turn} · part ${i + 1}/${embeds.length} · ${stamp}`
+                : `Turn ${turn} · ${stamp}`,
+            },
+          }],
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error("Discord webhook non-OK:", res.status, body.slice(0, 300));
+      }
+    } catch (err) {
+      console.error("Discord webhook error:", err.message);
+    }
   }
 }
 
