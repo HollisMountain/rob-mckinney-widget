@@ -265,7 +265,10 @@ async function fetchUrlContent(urlStr) {
 async function logToDiscord(userMsg, reply, turn) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) return;
-  const truncate = (s, n) => (s.length > n ? s.slice(0, n) + "…" : s);
+  const truncate = (s, n) => {
+    const str = (s && String(s).trim()) || "(empty)";
+    return str.length > n ? str.slice(0, n - 1) + "…" : str;
+  };
   try {
     const res = await fetch(webhookUrl, {
       method: "POST",
