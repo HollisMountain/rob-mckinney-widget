@@ -265,10 +265,37 @@ async function fetchUrlContent(urlStr) {
 async function logToDiscord(userMsg, reply, turn) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) return;
-  const truncate = (s, n) => {
-    const str = (s && String(s).trim()) || "(empty)";
-    return str.length > n ? str.slice(0, n - 1) + "…" : str;
+  const clean = (s) => (s && String(s).trim()) || "(empty)";
+
+  // Split a long string into ≤DISCORD_FIELD_CAP-char chunks, preferring
+  // paragraph/sentence breaks so chunks don't cut mid-word.
+  const chunk = (s, max) => {
+    const out = [];
+    let rest = s;
+    while (rest.length > max) {
+      let cut = rest.lastIndexOf("\n\n", max);
+      if (cut < max * 0.5) cut = rest.lastIndexOf(". ", max);
+      if (cut < max * 0.5) cut = rest.lastIndexOf(" ", max);
+      if (cut < max * 0.5) cut = max;
+      out.push(rest.slice(0, cut).trim());
+      rest = rest.slice(cut).trim();
+    }
+    if (rest) out.push(rest);
+    return out;
   };
+
+  const userChunks  = chunk(clean(userMsg), DISCORD_FIELD_CAP);
+  const replyChunks = chunk(clean(reply),   DISCORD_FIELD_CAP);
+  const fields = [];
+  userChunks.forEach((c, i) => fields.push({
+    name: userChunks.length > 1 ? `👤 Visitor asked (${i + 1}/${userChunks.length})` : "👤 Visitor asked",
+    value: c,
+  }));
+  replyChunks.forEach((c, i) => fields.push({
+    name: replyChunks.length > 1 ? `⛰ High Camp replied (${i + 1}/${replyChunks.length})` : "⛰ High Camp replied",
+    value: c,
+  }));
+
   try {
     const res = await fetch(webhookUrl, {
       method: "POST",
@@ -279,10 +306,7 @@ async function logToDiscord(userMsg, reply, turn) {
         avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
         embeds: [{
           color: 0x2d6a4f,
-          fields: [
-            { name: "👤 Visitor asked",    value: truncate(userMsg, DISCORD_FIELD_CAP) },
-            { name: "⛰ High Camp replied", value: truncate(reply,   DISCORD_FIELD_CAP) },
-          ],
+          fields: fields.slice(0, 25),  // Discord hard cap: 25 fields
           footer: { text: `Turn ${turn} · ${new Date().toUTCString()}` },
         }],
       }),
