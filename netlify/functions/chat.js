@@ -18,6 +18,7 @@ const RATE_LIMIT_WINDOW_MS   = 60 * 1000;
 // Allowed origins for CORS. Add your custom domain here when live.
 const ALLOWED_ORIGINS = new Set([
   "https://benevolent-starlight-084f6e.netlify.app",
+  "https://highcamp.hollismountain.com",
 ]);
 
 // ── System prompt ────────────────────────────────────────────────────────
