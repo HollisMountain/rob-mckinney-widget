@@ -2,7 +2,6 @@
   "name": "rob-mckinney-widget",
   "version": "1.0.0",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
     "google-auth-library": "^9.14.2"
   }
 }

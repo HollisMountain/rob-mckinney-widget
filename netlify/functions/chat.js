@@ -17,11 +17,22 @@ const MAX_MESSAGE_LENGTH     = 20000;  // generous enough for a full pasted JD
 const RATE_LIMIT_PER_MIN     = 10;
 const RATE_LIMIT_WINDOW_MS   = 60 * 1000;
 
-// Allowed origins for CORS. Add your custom domain here when live.
+// Allowed origins for CORS. Exact-match strings + a pattern list for
+// generated deploy-preview URLs (Netlify-controlled, owned by us).
 const ALLOWED_ORIGINS = new Set([
   "https://benevolent-starlight-084f6e.netlify.app",
   "https://highcamp.hollismountain.com",
 ]);
+
+const ALLOWED_ORIGIN_PATTERNS = [
+  // deploy-preview-<N>--benevolent-starlight-084f6e.netlify.app
+  /^https:\/\/deploy-preview-\d+--benevolent-starlight-084f6e\.netlify\.app$/,
+];
+
+function isAllowedOrigin(origin) {
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  return ALLOWED_ORIGIN_PATTERNS.some((p) => p.test(origin));
+}
 
 // ── System prompt ────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are High Camp, a career intelligence assistant with deep knowledge of Rob McKinney's background. Your job is to help potential employers objectively explore whether Rob is a strong fit for their role. You present Rob's experience accurately and specifically — letting the facts speak for themselves rather than advocating or overselling.
@@ -275,7 +286,7 @@ function isSafeUrl(urlStr) {
 
 // ── CORS helpers ─────────────────────────────────────────────────────────
 function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.has(origin);
+  const allowed = isAllowedOrigin(origin);
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "null",
     "Access-Control-Allow-Headers": "Content-Type",
