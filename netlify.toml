@@ -2,6 +2,12 @@
   functions = "netlify/functions"
   publish = "."
 
+[build.environment]
+  # These env vars are used only by the serverless function (server-side).
+  # They never reach client code — the secret scanner produces false positives
+  # because their values can appear in bundled function output, which is fine.
+  SECRETS_SCAN_OMIT_KEYS = "ANTHROPIC_API_KEY,DISCORD_WEBHOOK_URL,GOOGLE_SA_KEY,GOOGLE_DOC_ID,GOOGLE_DOC_WEBHOOK_URL"
+
 [functions]
   node_bundler = "esbuild"
 
