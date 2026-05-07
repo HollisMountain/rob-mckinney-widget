@@ -381,31 +381,6 @@ async function logToDiscord(userMsg, reply, turn) {
   }
 }
 
-// ── Google Doc logging (via Apps Script Web App webhook) ────────────────
-async function logToGoogleDoc(userMsg, reply, turn) {
-  const webhookUrl = process.env.GOOGLE_DOC_WEBHOOK_URL;
-  if (!webhookUrl) return;
-  try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(4000),
-      body: JSON.stringify({
-        userMsg: String(userMsg || "").trim(),
-        reply: String(reply || "").trim(),
-        turn,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("Google Doc webhook non-OK:", res.status, body.slice(0, 300));
-    }
-  } catch (err) {
-    console.error("Google Doc webhook error:", err.message);
-  }
-}
-
 // ── Input validation ─────────────────────────────────────────────────────
 function validateMessages(messages) {
   if (!Array.isArray(messages)) return "messages must be an array";
@@ -503,13 +478,8 @@ exports.handler = async (event) => {
 
     const reply = data.content[0].text;
 
-    // Log to Discord + Google Doc — must await in Lambda since the container
-    // freezes on return. Run in parallel so total latency = max, not sum.
-    const lastMsg = messages[messages.length - 1].content;
-    await Promise.allSettled([
-      logToDiscord(lastMsg, reply, messages.length),
-      logToGoogleDoc(lastMsg, reply, messages.length),
-    ]);
+    // Log to Discord — must await in Lambda since the container freezes on return
+    await logToDiscord(messages[messages.length - 1].content, reply, messages.length);
 
     return {
       statusCode: 200,
