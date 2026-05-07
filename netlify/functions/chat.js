@@ -231,6 +231,10 @@ function isRateLimited(ip) {
 }
 
 // ── SSRF protection ──────────────────────────────────────────────────────
+// NOTE: This is a hostname-string check only. It cannot prevent DNS rebinding
+// (an attacker-controlled hostname that resolves to a private IP at fetch
+// time). Mitigated in practice because the function pipes fetched text
+// through Claude rather than returning it raw — limited exfil value.
 function isPrivateOrUnsafeHost(hostname) {
   const h = hostname.toLowerCase();
   // IPv4 private / loopback / link-local / metadata
@@ -240,13 +244,21 @@ function isPrivateOrUnsafeHost(hostname) {
   if (/^127\./.test(h)) return true;
   if (/^169\.254\./.test(h)) return true;
   if (/^0\./.test(h)) return true;
+  // IPv4 carrier-grade NAT (RFC 6598, 100.64.0.0/10)
+  if (/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(h)) return true;
+  // Numeric-encoded IPv4 (e.g., 2130706433 = 127.0.0.1, 0x7f000001).
+  // Legitimate hostnames don't look like pure decimal/hex numbers.
+  if (/^(0x[0-9a-f]+|\d+)$/i.test(h)) return true;
   // Hostnames
   if (h === "localhost" || h.endsWith(".localhost")) return true;
   if (h === "metadata.google.internal" || h.startsWith("metadata.")) return true;
-  // IPv6 loopback / link-local / unique-local
+  // IPv6 unspecified / loopback / link-local / unique-local
+  if (h === "::" || h === "[::]") return true;
   if (h === "::1" || h === "[::1]") return true;
   if (/^\[?fe80:/i.test(h)) return true;
   if (/^\[?fc00:/i.test(h) || /^\[?fd/i.test(h)) return true;
+  // IPv6 IPv4-mapped (::ffff:a.b.c.d) — could mask a private IPv4
+  if (/^\[?::ffff:/i.test(h) || /^\[?0:0:0:0:0:ffff:/i.test(h)) return true;
   return false;
 }
 
@@ -273,6 +285,32 @@ function corsHeaders(origin) {
 }
 
 // ── URL content fetching (with size guard) ───────────────────────────────
+
+// Reads the response body via a stream and aborts if it exceeds maxBytes.
+// Necessary because Content-Length can be missing or lie — relying on it
+// alone leaves the function open to memory/time DoS via oversized bodies.
+async function readBodyWithCap(res, maxBytes) {
+  const reader = res.body.getReader();
+  const chunks = [];
+  let received = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.length;
+      if (received > maxBytes) {
+        // Cancel the underlying stream so we don't keep buffering.
+        reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try { reader.releaseLock(); } catch {}
+  }
+  return new TextDecoder("utf-8", { fatal: false }).decode(Buffer.concat(chunks));
+}
+
 async function fetchUrlContent(urlStr) {
   if (!isSafeUrl(urlStr)) {
     return { ok: false, reason: "Unsafe URL rejected" };
@@ -282,6 +320,8 @@ async function fetchUrlContent(urlStr) {
     signal: AbortSignal.timeout(URL_FETCH_TIMEOUT_MS),
     redirect: "follow",
   });
+  // Early-out on declared size — saves us from even starting to stream
+  // when the server is honest about a huge body.
   const contentLength = Number(res.headers.get("content-length") || 0);
   if (contentLength > MAX_URL_CONTENT_BYTES) {
     return { ok: false, reason: `Content too large (${contentLength} bytes)` };
@@ -290,7 +330,11 @@ async function fetchUrlContent(urlStr) {
   if (!isSafeUrl(res.url)) {
     return { ok: false, reason: "Redirected to unsafe URL" };
   }
-  const html = await res.text();
+  // Stream-read with hard byte cap — catches lying Content-Length or its absence.
+  const html = await readBodyWithCap(res, MAX_URL_CONTENT_BYTES);
+  if (html === null) {
+    return { ok: false, reason: `Body exceeded ${MAX_URL_CONTENT_BYTES} bytes during read` };
+  }
   const text = html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -525,11 +569,16 @@ exports.handler = async (event) => {
       body: JSON.stringify({ content: reply }),
     };
   } catch (err) {
+    // Log full detail server-side. Do NOT bleed upstream API errors (which
+    // can include billing/auth state from Anthropic) to the visitor —
+    // return a generic message and direct them to email instead.
     console.error("Handler error:", err);
     return {
       statusCode: 500,
       headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ error: err.message || String(err) }),
+      body: JSON.stringify({
+        error: "Service temporarily unavailable. Please try again in a moment, or email rob@hollismountain.com directly.",
+      }),
     };
   }
 };
