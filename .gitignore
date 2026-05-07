@@ -1,0 +1,35 @@
+# Local Claude Code state — contains tool permission rules and may include
+# command snippets with embedded credentials. Must never be committed.
+.claude/settings.local.json
+.claude/worktrees/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Service account keys and other JSON credential files (be specific to avoid
+# accidentally ignoring legitimate config files like package.json)
+*-credentials.json
+*-key.json
+service-account*.json
+
+# Node
+node_modules/
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts (Netlify builds remotely; we never commit local builds)
+.netlify/
+dist/
+build/
