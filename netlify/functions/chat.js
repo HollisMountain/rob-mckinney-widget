@@ -14,7 +14,6 @@ const MAX_URL_CONTENT_BYTES  = 2 * 1024 * 1024;   // 2 MB hard limit
 const URL_FETCH_TIMEOUT_MS   = 8000;
 const MAX_HISTORY_MESSAGES   = 20;
 const MAX_MESSAGE_LENGTH     = 20000;  // generous enough for a full pasted JD
-const DISCORD_FIELD_CAP      = 1024;
 const RATE_LIMIT_PER_MIN     = 10;
 const RATE_LIMIT_WINDOW_MS   = 60 * 1000;
 
@@ -303,85 +302,53 @@ async function fetchUrlContent(urlStr) {
 }
 
 // ── Discord logging ──────────────────────────────────────────────────────
+// Brief alert only — full transcript lives in the Google Doc. Discord acts
+// as a phone-friendly push notification with a one-click link to the doc.
+//
 // NOTE: In Lambda/Netlify Functions the container freezes when the handler
 // returns, so we must await this (with a tight timeout) rather than
 // fire-and-forget — otherwise the request gets killed mid-flight.
 async function logToDiscord(userMsg, reply, turn) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) return;
-  const clean = (s) => (s && String(s).trim()) || "(empty)";
 
-  // Discord limits: 1024 chars/field, 6000 chars total per embed, 25 fields.
-  // Budget ~4800 chars of content per embed to stay safely under 6000.
-  const EMBED_BUDGET = 4800;
+  const docId = process.env.GOOGLE_DOC_ID;
+  const docUrl = docId ? `https://docs.google.com/document/d/${docId}/edit` : null;
 
-  const chunk = (s, max) => {
-    const out = [];
-    let rest = s;
-    while (rest.length > max) {
-      let cut = rest.lastIndexOf("\n\n", max);
-      if (cut < max * 0.5) cut = rest.lastIndexOf(". ", max);
-      if (cut < max * 0.5) cut = rest.lastIndexOf(" ", max);
-      if (cut < max * 0.5) cut = max;
-      out.push(rest.slice(0, cut).trim());
-      rest = rest.slice(cut).trim();
+  // Short preview of the visitor's question — enough to know if it's worth
+  // opening the doc immediately or reading later. Discord description cap
+  // is 4096 chars; we use far less.
+  const preview = (userMsg && String(userMsg).trim()) || "(empty)";
+  const previewShort = preview.length > 180 ? preview.slice(0, 179) + "…" : preview;
+
+  const description = docUrl
+    ? `> ${previewShort}\n\n[**Read full transcript →**](${docUrl})`
+    : `> ${previewShort}`;
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(2500),
+      body: JSON.stringify({
+        username: "High Camp",
+        avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+        embeds: [{
+          color: 0x2d6a4f,
+          title: turn === 1
+            ? "💬 New conversation started"
+            : `💬 Conversation continuing (Turn ${turn})`,
+          description,
+          footer: { text: new Date().toUTCString() },
+        }],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("Discord webhook non-OK:", res.status, body.slice(0, 300));
     }
-    if (rest) out.push(rest);
-    return out;
-  };
-
-  // Build a list of labeled chunks, then pack into embeds under the budget.
-  const pieces = [
-    ...chunk(clean(userMsg), DISCORD_FIELD_CAP).map((v, i, a) => ({
-      name: a.length > 1 ? `👤 Visitor asked (${i + 1}/${a.length})` : "👤 Visitor asked",
-      value: v,
-    })),
-    ...chunk(clean(reply), DISCORD_FIELD_CAP).map((v, i, a) => ({
-      name: a.length > 1 ? `⛰ High Camp replied (${i + 1}/${a.length})` : "⛰ High Camp replied",
-      value: v,
-    })),
-  ];
-
-  const embeds = [];
-  let current = [], currentSize = 0;
-  for (const p of pieces) {
-    const pSize = p.name.length + p.value.length;
-    if (current.length && (currentSize + pSize > EMBED_BUDGET || current.length >= 25)) {
-      embeds.push(current);
-      current = []; currentSize = 0;
-    }
-    current.push(p); currentSize += pSize;
-  }
-  if (current.length) embeds.push(current);
-
-  const stamp = new Date().toUTCString();
-  for (let i = 0; i < embeds.length; i++) {
-    try {
-      const res = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(2500),
-        body: JSON.stringify({
-          username: "High Camp",
-          avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-          embeds: [{
-            color: 0x2d6a4f,
-            fields: embeds[i],
-            footer: {
-              text: embeds.length > 1
-                ? `Turn ${turn} · part ${i + 1}/${embeds.length} · ${stamp}`
-                : `Turn ${turn} · ${stamp}`,
-            },
-          }],
-        }),
-      });
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        console.error("Discord webhook non-OK:", res.status, body.slice(0, 300));
-      }
-    } catch (err) {
-      console.error("Discord webhook error:", err.message);
-    }
+  } catch (err) {
+    console.error("Discord webhook error:", err.message);
   }
 }
 
