@@ -545,10 +545,10 @@ exports.handler = async (event) => {
     const reply = data.content[0].text;
 
     // Log to Discord — must await in Lambda since the container freezes on return
-    const lastMsg = messages[messages.length - 1].content;
+    const finalUserMsg = messages[messages.length - 1].content;
     await Promise.allSettled([
-      logToDiscord(lastMsg, reply, messages.length),
-      logToGoogleDoc(lastMsg, reply, messages.length),
+      logToDiscord(finalUserMsg, reply, messages.length),
+      logToGoogleDoc(finalUserMsg, reply, messages.length),
     ]);
 
     return {
