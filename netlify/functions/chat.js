@@ -1,7 +1,10 @@
 // =========================================================================
 // High Camp — Netlify Function
-// Handles Claude API calls, URL fetching, rate limiting, and Discord logging.
+// Handles Claude API calls, URL fetching, rate limiting, Discord logging,
+// and Google Docs logging via service-account OAuth.
 // =========================================================================
+
+const { JWT } = require("google-auth-library");
 
 // ── Config constants ─────────────────────────────────────────────────────
 const MODEL                  = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
@@ -381,6 +384,69 @@ async function logToDiscord(userMsg, reply, turn) {
   }
 }
 
+// ── Google Docs logging (via service-account OAuth) ─────────────────────
+// Authenticates with a Google service account, then calls the Docs API
+// to insert each conversation at the top of the doc (reverse chrono).
+// Cached at module scope so warm Lambda invocations reuse the OAuth token.
+let _gDocsClient = null;
+function getDocsClient() {
+  if (_gDocsClient) return _gDocsClient;
+  const keyJson = process.env.GOOGLE_SA_KEY;
+  if (!keyJson) return null;
+  try {
+    const key = JSON.parse(keyJson);
+    _gDocsClient = new JWT({
+      email: key.client_email,
+      key: key.private_key,
+      scopes: ["https://www.googleapis.com/auth/documents"],
+    });
+    return _gDocsClient;
+  } catch (err) {
+    console.error("Google SA key parse error:", err.message);
+    return null;
+  }
+}
+
+async function logToGoogleDoc(userMsg, reply, turn) {
+  const docId = process.env.GOOGLE_DOC_ID;
+  const client = getDocsClient();
+  if (!docId || !client) return;
+
+  const clean = (s) => (s && String(s).trim()) || "(empty)";
+  const stamp = new Date().toUTCString();
+  const block =
+    `\n────────────────────────────\n` +
+    `[${stamp}] · Turn ${turn}\n\n` +
+    `👤 Visitor asked\n${clean(userMsg)}\n\n` +
+    `⛰ High Camp replied\n${clean(reply)}\n\n`;
+
+  try {
+    const { token } = await client.getAccessToken();
+    const res = await fetch(
+      `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(3000),
+        body: JSON.stringify({
+          requests: [
+            { insertText: { location: { index: 1 }, text: block } },
+          ],
+        }),
+      }
+    );
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("Google Docs API non-OK:", res.status, body.slice(0, 300));
+    }
+  } catch (err) {
+    console.error("Google Docs logging error:", err.message);
+  }
+}
+
 // ── Input validation ─────────────────────────────────────────────────────
 function validateMessages(messages) {
   if (!Array.isArray(messages)) return "messages must be an array";
@@ -479,7 +545,11 @@ exports.handler = async (event) => {
     const reply = data.content[0].text;
 
     // Log to Discord — must await in Lambda since the container freezes on return
-    await logToDiscord(messages[messages.length - 1].content, reply, messages.length);
+    const finalUserMsg = messages[messages.length - 1].content;
+    await Promise.allSettled([
+      logToDiscord(finalUserMsg, reply, messages.length),
+      logToGoogleDoc(finalUserMsg, reply, messages.length),
+    ]);
 
     return {
       statusCode: 200,
