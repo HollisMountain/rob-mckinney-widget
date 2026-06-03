@@ -167,7 +167,7 @@
     }
     .msg.bot .msg-meta-line .msg-sender { color: var(--copper); }
     .msg.user .msg-meta-line .msg-sender { color: var(--slate-2); }
-    .msg-time { color: var(--slate); opacity: 0.7; }
+    .msg-time { color: var(--slate-2); }
 
     .msg-bubble {
       font-family: var(--sans);
@@ -295,7 +295,7 @@
       padding: 8px 0;
       max-height: 140px;
     }
-    #userInput::placeholder { color: var(--slate); }
+    #userInput::placeholder { color: var(--slate-2); opacity: 0.7; }
 
     #sendBtn {
       font-family: var(--sans);
@@ -570,6 +570,9 @@
       });
     }, { threshold: 0.12 });
     items.forEach(el => obs.observe(el));
+    // Belt-and-braces: ensure content shows even if intersections never fire
+    // (off-screen on load, iframe quirks, etc.)
+    setTimeout(() => items.forEach(el => el.classList.add('in')), 1200);
   })();
 
   // Initial greeting
