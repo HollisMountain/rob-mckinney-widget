@@ -49,6 +49,10 @@
       .hm .wm{display:none}
       .nav-right .back-long{display:none}
     }
+    @media(max-width:380px){
+      .nav-right .back{font-size:0}
+      .nav-right .back::before{content:"\2190";font-size:.95rem;color:var(--slate-2)}
+    }
 
     /* ===== THREAD ===== */
     .thread{flex:1;overflow-y:auto;position:relative}
@@ -65,7 +69,7 @@
     .avatar.me span{font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;color:var(--slate-2)}
 
     .bubble{flex:1;min-width:0}
-    .who{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-bottom:8px}
+    .who{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--slate-2);margin-bottom:8px}
     .msg.user{flex-direction:row-reverse}
     .msg.user .bubble{display:flex;justify-content:flex-end}
     .msg.user .utext{
@@ -258,8 +262,14 @@
     }
 
     function typing() {
-      const el = hcShell();
-      el.querySelector('.body').innerHTML = '<div class="typing"><i></i><i></i><i></i></div>';
+      // Bare typing row — no "HIGH CAMP" eyebrow, matches the design intent.
+      const el = document.createElement('div');
+      el.className = 'msg hc';
+      el.innerHTML =
+        '<div class="avatar hc">' + FLAG + '</div>'
+        + '<div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
       scrollDown();
       return el;
     }
