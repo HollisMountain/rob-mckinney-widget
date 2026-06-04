@@ -3,584 +3,347 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>High Camp · Rob McKinney</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='2' fill='%23fafaf9'/><path d='M6 50 L22 22 L32 36 L42 18 L58 50 Z' fill='%232d6a4f'/><path d='M22 22 L28 32 L24 32 Z' fill='%23ffffff'/><path d='M42 18 L46 26 L38 26 Z' fill='%23ffffff'/></svg>"/>
+  <title>High Camp — Hollis Mountain</title>
+  <meta name="description" content="High Camp — a career-intelligence guide built on Rob McKinney's full professional background. Share a role; get an honest read on the fit."/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'><path d='M2 23 L8 11 L12 17 L17 6 L24 23 Z' stroke='%232d6a4f' stroke-width='1.6' fill='none' stroke-linejoin='round'/><path d='M17 6 L17 2 L22 3.5 L17 5 Z' fill='%232d6a4f' stroke='%232d6a4f' stroke-width='1' stroke-linejoin='round'/></svg>"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Spline+Sans+Mono:wght@400;500;600&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ink: #ffffff;
-      --ink-2: #f4f4f2;
-      --paper: #fafaf9;
-      --paper-2: #e8e8e4;
-      --summit: #0f1614;
-      --slate: #8a9088;
-      --slate-2: #3d4a44;
-      --pine: #1a4030;
-      --copper: #2d6a4f;
-      --copper-glow: rgba(45, 106, 79, 0.14);
-      --line: rgba(45, 106, 79, 0.14);
-      --display: 'Spectral', Georgia, serif;
-      --sans: 'Archivo', 'Helvetica Neue', sans-serif;
-      --mono: 'Spline Sans Mono', monospace;
+    :root{
+      --ink:#ffffff; --ink-2:#f4f4f2; --paper:#fafaf9; --paper-2:#e8e8e4;
+      --summit:#0f1614; --slate:#8a9088; --slate-2:#3d4a44;
+      --pine:#1a4030; --copper:#2d6a4f; --copper-glow:rgba(45,106,79,.14);
+      --line:rgba(45,106,79,.14);
+      --display:'Spectral',Georgia,serif;
+      --sans:'Archivo','Helvetica Neue',sans-serif;
+      --mono:'Spline Sans Mono',monospace;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--ink);
-      color: var(--summit);
-      font-family: var(--sans);
-      font-size: 16px;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--ink);color:var(--summit);font-family:var(--sans);line-height:1.6;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      height:100dvh;display:flex;flex-direction:column;overflow:hidden;
     }
+    ::selection{background:var(--copper);color:var(--ink)}
+    a{color:inherit}
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    /* ===== NAV ===== */
+    nav{
+      flex:none;display:flex;align-items:center;justify-content:space-between;
+      padding:16px 28px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.92);
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10;
     }
-
-    /* Signature: grain overlay */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
-      mix-blend-mode: multiply;
-      opacity: 0.5;
+    .nav-left{display:flex;align-items:center;gap:16px}
+    .hm{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--summit)}
+    .hm .wm{font-family:var(--display);font-weight:600;font-size:1.02rem;letter-spacing:.01em}
+    .nav-div{width:1px;height:26px;background:var(--line)}
+    .hc-ctx{display:flex;align-items:center;gap:9px}
+    .hc-ctx .nm{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--copper)}
+    .nav-right{display:flex;align-items:center;gap:20px}
+    .back{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-2);text-decoration:none;transition:color .2s}
+    .back:hover{color:var(--summit)}
+    @media(max-width:600px){
+      nav{padding:14px 18px}
+      .hm .wm{display:none}
+      .nav-right .back-long{display:none}
     }
 
-    ::selection { background: var(--copper); color: var(--ink); }
+    /* ===== THREAD ===== */
+    .thread{flex:1;overflow-y:auto;position:relative}
+    .thread-inner{max-width:780px;margin:0 auto;padding:48px 28px 24px}
+    .ridge{position:fixed;left:0;right:0;bottom:78px;height:200px;z-index:0;opacity:.4;pointer-events:none}
 
-    /* Layout */
-    .container {
-      width: 100%;
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 32px;
-      position: relative;
-      z-index: 2;
-    }
+    .msg{display:flex;gap:14px;margin-bottom:30px;position:relative;z-index:1;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
+    .msg.enter{transform:translateY(10px)}
+    @media(prefers-reduced-motion:reduce){.msg{transition:none}.msg.enter{transform:none}}
 
-    .page {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 56px 0 40px;
-      gap: 48px;
-    }
+    .avatar{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .avatar.hc{background:var(--pine)}
+    .avatar.me{background:var(--ink-2);border:1px solid var(--line)}
+    .avatar.me span{font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;color:var(--slate-2)}
 
-    /* Eyebrow / section label */
-    .eyebrow {
-      font-family: var(--mono);
-      font-weight: 500;
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--copper);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
+    .bubble{flex:1;min-width:0}
+    .who{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-bottom:8px}
+    .msg.user{flex-direction:row-reverse}
+    .msg.user .bubble{display:flex;justify-content:flex-end}
+    .msg.user .utext{
+      background:var(--ink-2);border:1px solid var(--line);border-radius:3px;
+      padding:13px 17px;font-size:.98rem;color:var(--summit);max-width:80%;
+      line-height:1.55;white-space:pre-wrap;word-wrap:break-word;
     }
-    .eyebrow::before {
-      content: "";
-      width: 30px;
-      height: 1px;
-      background: var(--copper);
-      flex-shrink: 0;
-    }
+    .atext{font-size:1.02rem;color:var(--slate-2);line-height:1.62}
+    .atext strong{color:var(--summit);font-weight:600}
+    .atext em{font-style:italic}
+    .atext p{margin-bottom:13px}
+    .atext p:last-child{margin-bottom:0}
+    .atext ul, .atext ol{list-style:none;padding-left:0;margin:10px 0}
+    .atext li{position:relative;padding-left:18px;margin-bottom:6px}
+    .atext li::before{content:"\2013";position:absolute;left:0;color:var(--copper);font-weight:500}
+    .atext a{color:var(--copper);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--copper-glow)}
 
-    /* Hero */
-    .hero {
-      max-width: 820px;
+    /* suggestion chips */
+    .suggest{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+    .schip{
+      font-family:var(--sans);font-size:.86rem;color:var(--slate-2);
+      background:var(--ink);border:1px solid var(--line);border-radius:999px;
+      padding:9px 16px;cursor:pointer;transition:border-color .2s,color .2s;line-height:1.3;
     }
-    .hero .eyebrow { margin-bottom: 22px; }
-    .hero h1 {
-      font-family: var(--display);
-      font-weight: 500;
-      font-size: clamp(2.4rem, 5.4vw, 4.2rem);
-      line-height: 1.02;
-      letter-spacing: -0.02em;
-      max-width: 16ch;
-      color: var(--summit);
-    }
-    .hero h1 em {
-      font-style: italic;
-      font-weight: 500;
-      color: var(--copper);
-    }
-    .hero .lede {
-      margin-top: 20px;
-      font-family: var(--sans);
-      font-weight: 400;
-      font-size: clamp(1.05rem, 1.6vw, 1.22rem);
-      line-height: 1.5;
-      color: var(--slate-2);
-      max-width: 56ch;
-    }
-    .hero .lede strong { color: var(--summit); font-weight: 600; }
+    .schip:hover{border-color:var(--copper);color:var(--copper)}
 
-    /* Chat shell */
-    .chat-shell {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-      max-width: 820px;
-      width: 100%;
-    }
+    /* typing indicator */
+    .typing{display:inline-flex;gap:5px;align-items:center;padding:6px 0}
+    .typing i{width:7px;height:7px;border-radius:50%;background:var(--copper);opacity:.4;animation:blink 1.2s infinite}
+    .typing i:nth-child(2){animation-delay:.2s}
+    .typing i:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+    @media(prefers-reduced-motion:reduce){.typing i{animation:none;opacity:.6}}
 
-    /* Messages thread */
-    .messages-thread {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-      padding: 4px 0 8px;
-      min-height: 200px;
+    /* ===== COMPOSER ===== */
+    .composer-wrap{flex:none;border-top:1px solid var(--line);background:rgba(255,255,255,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10}
+    .composer{max-width:780px;margin:0 auto;padding:16px 28px 10px}
+    .composer form{
+      display:flex;align-items:flex-end;gap:12px;
+      border:1px solid var(--line);border-radius:4px;padding:8px 8px 8px 16px;
+      background:var(--ink);transition:border-color .2s,box-shadow .2s;
     }
-
-    .msg {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 100%;
+    .composer form:focus-within{border-color:var(--copper);box-shadow:0 0 0 3px var(--copper-glow)}
+    .composer textarea{
+      flex:1;border:none;outline:none;resize:none;
+      font-family:var(--sans);font-size:1rem;color:var(--summit);
+      line-height:1.5;background:transparent;max-height:160px;padding:7px 0;
     }
-    .msg.user {
-      align-items: flex-end;
+    .composer textarea::placeholder{color:var(--slate-2);opacity:.7}
+    .send{
+      flex:none;width:42px;height:42px;border-radius:3px;border:none;
+      background:var(--copper);color:var(--ink);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .2s,opacity .2s;
     }
-
-    .msg-meta-line {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 0.66rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--slate);
+    .send:hover:not(:disabled){background:var(--pine)}
+    .send:disabled{opacity:.4;cursor:default}
+    .disclaimer{
+      max-width:780px;margin:0 auto;padding:0 28px 12px;
+      font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
+      color:var(--slate-2);text-align:center;line-height:1.5;
     }
-    .msg.bot .msg-meta-line .msg-sender { color: var(--copper); }
-    .msg.user .msg-meta-line .msg-sender { color: var(--slate-2); }
-    .msg-time { color: var(--slate-2); }
-
-    .msg-bubble {
-      font-family: var(--sans);
-      font-size: 1rem;
-      line-height: 1.6;
-      padding: 18px 22px;
-      border-radius: 3px;
-      max-width: 660px;
-    }
-    .msg.bot .msg-bubble {
-      background: var(--paper);
-      color: var(--summit);
-      border: 1px solid var(--line);
-    }
-    .msg.user .msg-bubble {
-      background: var(--copper);
-      color: var(--ink);
-    }
-    .msg-bubble p + p { margin-top: 10px; }
-    .msg-bubble strong { font-weight: 600; }
-    .msg-bubble em { font-style: italic; }
-    .msg-bubble a {
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      text-decoration-color: var(--copper-glow);
-    }
-    /* List bullets: en-dash signature */
-    .msg-bubble ul, .msg-bubble ol { list-style: none; padding-left: 0; margin-top: 8px; }
-    .msg-bubble li { position: relative; padding-left: 1.4em; margin-top: 4px; }
-    .msg-bubble li::before {
-      content: "\2013";
-      position: absolute;
-      left: 0;
-      color: var(--copper);
-      font-weight: 500;
-    }
-    .msg.user .msg-bubble li::before { color: var(--ink); opacity: 0.7; }
-
-    /* Typing status */
-    .typing-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      color: var(--slate-2);
-    }
-    .typing-status .pulse {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--copper);
-      box-shadow: 0 0 0 0 var(--copper-glow);
-      animation: tpulse 1.4s ease-out infinite;
-      flex-shrink: 0;
-    }
-    .typing-status .label {
-      opacity: 0;
-      transform: translateY(2px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
-    .typing-status .label.in { opacity: 1; transform: translateY(0); }
-    @keyframes tpulse {
-      0%   { box-shadow: 0 0 0 0 var(--copper-glow); transform: scale(1); }
-      70%  { box-shadow: 0 0 0 10px rgba(45, 106, 79, 0); transform: scale(1.05); }
-      100% { box-shadow: 0 0 0 0 rgba(45, 106, 79, 0); transform: scale(1); }
-    }
-
-    /* Starters */
-    .starters-area .eyebrow { margin-bottom: 14px; }
-    .starters-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    .starter {
-      font-family: var(--sans);
-      font-size: 0.92rem;
-      font-weight: 500;
-      color: var(--summit);
-      background: transparent;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 13px 18px;
-      text-align: left;
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-      line-height: 1.4;
-    }
-    .starter:hover {
-      border-color: var(--summit);
-      background: var(--paper);
-    }
-
-    /* Input */
-    .input-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .input-box {
-      display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      background: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 10px 10px 10px 16px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .input-box:focus-within {
-      border-color: var(--copper);
-      box-shadow: 0 0 0 4px var(--copper-glow);
-    }
-    #userInput {
-      flex: 1;
-      border: none;
-      outline: none;
-      resize: none;
-      background: transparent;
-      font-family: var(--sans);
-      font-size: 1rem;
-      line-height: 1.5;
-      color: var(--summit);
-      padding: 8px 0;
-      max-height: 140px;
-    }
-    #userInput::placeholder { color: var(--slate-2); opacity: 0.7; }
-
-    #sendBtn {
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.92rem;
-      letter-spacing: 0.01em;
-      color: var(--ink);
-      background: var(--copper);
-      border: none;
-      border-radius: 2px;
-      padding: 13px 22px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      white-space: nowrap;
-      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-    }
-    #sendBtn:hover:not(:disabled) {
-      background: var(--pine);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px -10px var(--copper);
-    }
-    #sendBtn:disabled {
-      background: var(--paper-2);
-      color: var(--slate);
-      cursor: not-allowed;
-    }
-    #sendBtn svg { display: block; }
-
-    .hint, .privacy {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
-      color: var(--slate-2);
-      text-align: center;
-      line-height: 1.5;
-    }
-    .privacy { margin-top: 2px; opacity: 0.85; }
-
-    /* Scroll reveal */
-    .reveal {
-      opacity: 0;
-      transform: translateY(22px);
-      transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
-                  transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
-    }
-    .reveal.in { opacity: 1; transform: translateY(0); }
-
-    /* Responsive */
-    @media (max-width: 720px) {
-      .container { padding: 0 20px; }
-      .page { padding: 36px 0 28px; gap: 32px; }
-      .hero h1 { font-size: clamp(2rem, 8vw, 2.6rem); max-width: 100%; }
-      .hero .lede { font-size: 1rem; }
-      .msg-bubble { padding: 14px 16px; font-size: 0.96rem; }
-      .starters-grid { grid-template-columns: 1fr; }
-      #sendBtn { padding: 11px 16px; font-size: 0.86rem; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
-      .typing-status .pulse { animation: none; }
-      #sendBtn { transition: none; }
+    @media(max-width:600px){
+      .composer{padding:12px 18px 8px}
+      .disclaimer{padding:0 18px 10px}
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="page">
-
-    <header class="hero reveal">
-      <div class="eyebrow"><span>Rob McKinney · Career Intelligence</span></div>
-      <h1>Is Rob right for <em>your role?</em></h1>
-      <p class="lede">
-        A <strong>GenAI leader &amp; executive</strong> — ask anything about his fit for your role.
-        Paste a job description, name a title, or just describe what you're hiring for.
-      </p>
-    </header>
-
-    <main class="chat-shell reveal">
-      <div id="messages" class="messages-thread"></div>
-
-      <div class="starters-area" id="startersWrap">
-        <div class="eyebrow"><span>Suggested</span></div>
-        <div class="starters-grid" id="starters">
-          <button class="starter">We're hiring a CPO at an early-stage startup</button>
-          <button class="starter">How deep is his hands-on GenAI experience?</button>
-          <button class="starter">Tell me about his leadership style</button>
-          <button class="starter">How was this widget built?</button>
-        </div>
-      </div>
-
-      <div class="input-wrap">
-        <div class="input-box">
-          <textarea
-            id="userInput"
-            rows="1"
-            placeholder="Paste a job description or ask anything about Rob…"
-          ></textarea>
-          <button id="sendBtn" aria-label="Send">
-            Send
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
-        <div class="hint">↵ send · ⇧↵ new line</div>
-        <div class="privacy">Conversations are logged and forwarded to Rob — please don't share confidential information.</div>
-      </div>
-    </main>
-
+<nav>
+  <div class="nav-left">
+    <a class="hm" href="https://hollismountain.com" title="Back to Hollis Mountain">
+      <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M2 22 L9 8 L13 15 L17 4 L24 22 Z" stroke="#2d6a4f" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M9 8 L11 11 L13 9" stroke="#0f1614" stroke-width="1.2" stroke-linejoin="round" opacity=".55"/>
+      </svg>
+      <span class="wm">Hollis Mountain</span>
+    </a>
+    <span class="nav-div"></span>
+    <span class="hc-ctx">
+      <svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#2d6a4f" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#2d6a4f" stroke="#2d6a4f" stroke-width="1" stroke-linejoin="round"/>
+      </svg>
+      <span class="nm">High Camp</span>
+    </span>
   </div>
+  <div class="nav-right">
+    <a class="back" href="https://hollismountain.com"><span class="back-long">← Back to </span>Hollis Mountain</a>
+  </div>
+</nav>
+
+<div class="thread" id="thread">
+  <svg class="ridge" viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path d="M0 200 L0 120 L160 60 L320 110 L470 40 L640 100 L820 30 L1000 95 L1200 50 L1440 110 L1440 200 Z" fill="#e3eae4"/>
+    <path d="M0 200 L0 150 L200 120 L420 150 L640 110 L880 150 L1120 120 L1440 150 L1440 200 Z" fill="#cfdad2"/>
+  </svg>
+  <div class="thread-inner" id="threadInner"></div>
+</div>
+
+<div class="composer-wrap">
+  <div class="composer">
+    <form id="composer">
+      <textarea
+        id="input"
+        rows="1"
+        placeholder="Paste a job description, a title, or a few details…"
+        autocomplete="off"
+      ></textarea>
+      <button class="send" id="send" type="submit" aria-label="Send" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12 L19 12 M13 6 L19 12 L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+  <div class="disclaimer">Conversations are logged and forwarded to Rob — please don't share confidential information.</div>
 </div>
 
 <script>
-  const messagesEl   = document.getElementById('messages');
-  const inputEl      = document.getElementById('userInput');
-  const sendBtn      = document.getElementById('sendBtn');
-  const startersWrap = document.getElementById('startersWrap');
-  const history = [];
-  let isLoading = false;
+  (function () {
+    const inner   = document.getElementById('threadInner');
+    const thread  = document.getElementById('thread');
+    const form    = document.getElementById('composer');
+    const input   = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
 
-  function autoResize() {
-    inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px';
-  }
+    const FLAG = '<svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true">'
+               + '<path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#fafaf9" stroke-width="1.7" stroke-linejoin="round"/>'
+               + '<path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#fafaf9" stroke="#fafaf9" stroke-width="1" stroke-linejoin="round"/>'
+               + '</svg>';
 
-  function ts() {
-    return new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: false });
-  }
+    const history = [];
+    let busy = false;
+    let suggestRemoved = false;
 
-  function formatText(t) {
-    return t
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g,'<em>$1</em>')
-      .replace(/\n\n/g,'</p><p>')
-      .replace(/\n/g,'<br>')
-      .replace(/^/,'<p>').replace(/$/,'</p>');
-  }
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
 
-  function renderMessage(role, text) {
-    const msg = document.createElement('div');
-    msg.className = `msg ${role}`;
+    function formatText(t) {
+      return esc(t)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(?<!\w)\*([^\*\n]+?)\*(?!\w)/g, '<em>$1</em>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^/, '<p>').replace(/$/, '</p>');
+    }
 
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta-line';
-    meta.innerHTML =
-      `<span class="msg-sender">${role === 'bot' ? 'High Camp' : 'You'}</span>` +
-      `<span class="msg-time">${ts()}</span>`;
+    function scrollDown() {
+      thread.scrollTop = thread.scrollHeight;
+    }
 
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.innerHTML = formatText(text);
+    function enterAnim(el) {
+      el.classList.add('enter');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('enter')));
+      setTimeout(() => el.classList.remove('enter'), 140);
+    }
 
-    msg.appendChild(meta);
-    msg.appendChild(bubble);
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    msg.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    return msg;
-  }
+    function userMsg(text) {
+      const el = document.createElement('div');
+      el.className = 'msg user';
+      el.innerHTML =
+        '<div class="avatar me"><span>YOU</span></div>'
+        + '<div class="bubble"><div class="utext">' + esc(text) + '</div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
+      scrollDown();
+    }
 
-  function renderTyping(phases) {
-    const msg = document.createElement('div');
-    msg.className = 'msg bot'; msg.id = 'typing';
+    function hcShell() {
+      const el = document.createElement('div');
+      el.className = 'msg hc';
+      el.innerHTML =
+        '<div class="avatar hc">' + FLAG + '</div>'
+        + '<div class="bubble"><div class="who">High Camp</div><div class="body"></div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
+      return el;
+    }
 
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta-line';
-    meta.innerHTML = '<span class="msg-sender">High Camp</span>';
+    function botMsg(text) {
+      const el = hcShell();
+      el.querySelector('.body').innerHTML = '<div class="atext">' + formatText(text) + '</div>';
+      scrollDown();
+      return el;
+    }
 
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.innerHTML = '<div class="typing-status"><span class="pulse"></span><span class="label"></span></div>';
+    function typing() {
+      const el = hcShell();
+      el.querySelector('.body').innerHTML = '<div class="typing"><i></i><i></i><i></i></div>';
+      scrollDown();
+      return el;
+    }
 
-    msg.appendChild(meta);
-    msg.appendChild(bubble);
-    messagesEl.appendChild(msg);
-    msg.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    function removeSuggestionsOnFirstSend() {
+      if (suggestRemoved) return;
+      const sug = inner.querySelector('.suggest');
+      if (sug) sug.remove();
+      suggestRemoved = true;
+    }
 
-    const labelEl = bubble.querySelector('.label');
-    const steps = phases && phases.length ? phases : [
-      'Reviewing background',
-      'Pulling relevant context',
-      'Drafting response',
-    ];
-    let i = 0;
-    const setLabel = (txt) => {
-      labelEl.classList.remove('in');
-      setTimeout(() => {
-        labelEl.textContent = txt + '…';
-        labelEl.classList.add('in');
-      }, 180);
-    };
-    setLabel(steps[0]);
-    msg._interval = setInterval(() => {
-      if (i < steps.length - 1) {
-        i++;
-        setLabel(steps[i]);
-        msg.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    async function submit(text) {
+      text = (text || '').trim();
+      if (!text || busy) return;
+      removeSuggestionsOnFirstSend();
+      busy = true;
+      updateSend();
+      userMsg(text);
+      history.push({ role: 'user', content: text });
+      input.value = '';
+      autosize();
+
+      const typingEl = typing();
+      try {
+        const res = await fetch('/.netlify/functions/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.slice(-40) }),
+        });
+        const data = await res.json();
+        typingEl.remove();
+        if (data.error) {
+          botMsg('Error: ' + data.error);
+        } else {
+          history.push({ role: 'assistant', content: data.content });
+          botMsg(data.content);
+        }
+      } catch {
+        typingEl.remove();
+        botMsg('Network error — please check your connection.');
       }
-    }, 1800);
-
-    const origRemove = msg.remove.bind(msg);
-    msg.remove = () => { clearInterval(msg._interval); origRemove(); };
-    return msg;
-  }
-
-  async function send(text) {
-    if (!text.trim() || isLoading) return;
-    startersWrap.style.display = 'none';
-    isLoading = true; sendBtn.disabled = true;
-    history.push({ role: 'user', content: text });
-    renderMessage('user', text);
-    inputEl.value = ''; autoResize();
-    const hasUrl = /https?:\/\/\S+/i.test(text);
-    const isRoleQuery = /\b(role|job|position|hiring|hire|fit|cpo|coo|cto|ceo|vp|director|manager|company|startup|description)\b/i.test(text);
-    let phases;
-    if (hasUrl) {
-      phases = ['Fetching link', 'Reading page content', 'Matching to Rob’s experience', 'Drafting response'];
-    } else if (isRoleQuery) {
-      phases = ['Reviewing background', 'Matching experience to role', 'Drafting response'];
-    } else {
-      phases = ['Reviewing background', 'Pulling relevant context', 'Drafting response'];
+      busy = false;
+      updateSend();
+      input.focus();
     }
-    const typing = renderTyping(phases);
-    try {
-      const res = await fetch('/.netlify/functions/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-40) }),
+
+    function autosize() {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+    }
+    function updateSend() {
+      sendBtn.disabled = busy || !input.value.trim();
+    }
+
+    input.addEventListener('input', () => { autosize(); updateSend(); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input.value); }
+    });
+    form.addEventListener('submit', e => { e.preventDefault(); submit(input.value); });
+
+    // Initial greeting
+    (async () => {
+      await new Promise(r => setTimeout(r, 250));
+      const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
+      history.push({ role: 'assistant', content: greeting });
+      const el = hcShell();
+      const body = el.querySelector('.body');
+      const chips = [
+        "We're hiring a CPO at an early-stage startup",
+        'How deep is his hands-on GenAI experience?',
+        'Tell me about his leadership style',
+        'How was this widget built?',
+      ];
+      let html = '<div class="atext">' + formatText(greeting) + '</div>';
+      html += '<div class="suggest">';
+      chips.forEach(c => { html += '<button class="schip" type="button">' + esc(c) + '</button>'; });
+      html += '</div>';
+      body.innerHTML = html;
+      body.querySelectorAll('.schip').forEach(chip => {
+        chip.addEventListener('click', () => submit(chip.textContent));
       });
-      const data = await res.json();
-      typing.remove();
-      if (data.error) {
-        renderMessage('bot', 'Error: ' + data.error);
-      } else {
-        history.push({ role: 'assistant', content: data.content });
-        renderMessage('bot', data.content);
-      }
-    } catch {
-      typing.remove();
-      renderMessage('bot', 'Network error — please check your connection.');
-    }
-    isLoading = false; sendBtn.disabled = false; inputEl.focus();
-  }
-
-  inputEl.addEventListener('input', autoResize);
-  inputEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(inputEl.value); }
-  });
-  sendBtn.addEventListener('click', () => send(inputEl.value));
-  document.querySelectorAll('.starter').forEach(b => b.addEventListener('click', () => send(b.textContent.trim())));
-
-  // Scroll reveal — staggered, up to 5 siblings
-  (() => {
-    const items = document.querySelectorAll('.reveal');
-    if (!('IntersectionObserver' in window)) {
-      items.forEach(el => el.classList.add('in'));
-      return;
-    }
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const target = entry.target;
-        const idx = Array.from(target.parentElement.children).indexOf(target);
-        target.style.transitionDelay = `${Math.min(idx, 5) * 70}ms`;
-        target.classList.add('in');
-        obs.unobserve(target);
-      });
-    }, { threshold: 0.12 });
-    items.forEach(el => obs.observe(el));
-    // Belt-and-braces: ensure content shows even if intersections never fire
-    // (off-screen on load, iframe quirks, etc.)
-    setTimeout(() => items.forEach(el => el.classList.add('in')), 1200);
-  })();
-
-  // Initial greeting
-  (async () => {
-    await new Promise(r => setTimeout(r, 300));
-    const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
-    history.push({ role: 'assistant', content: greeting });
-    renderMessage('bot', greeting);
+      scrollDown();
+      input.focus();
+    })();
   })();
 </script>
 
