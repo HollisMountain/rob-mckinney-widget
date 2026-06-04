@@ -3,1086 +3,358 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>High Camp · Rob McKinney</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23f5f2ec'/><path d='M6 50 L22 22 L32 36 L42 18 L58 50 Z' fill='%232d6a4f'/><path d='M22 22 L28 32 L24 32 Z' fill='%23ffffff'/><path d='M42 18 L46 26 L38 26 Z' fill='%23ffffff'/><circle cx='50' cy='14' r='3' fill='%238b6914'/></svg>"/>
+  <title>High Camp — Hollis Mountain</title>
+  <meta name="description" content="High Camp — a career-intelligence guide built on Rob McKinney's full professional background. Share a role; get an honest read on the fit."/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'><path d='M2 23 L8 11 L12 17 L17 6 L24 23 Z' stroke='%232d6a4f' stroke-width='1.6' fill='none' stroke-linejoin='round'/><path d='M17 6 L17 2 L22 3.5 L17 5 Z' fill='%232d6a4f' stroke='%232d6a4f' stroke-width='1' stroke-linejoin='round'/></svg>"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Spline+Sans+Mono:wght@400;500;600&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:         #f5f2ec;
-      --surface:    #faf8f4;
-      --surface2:   #f0ede6;
-      --surface3:   #e6e1d8;
-      --border:     rgba(0,0,0,0.08);
-      --border2:    rgba(0,0,0,0.13);
-      --pine:       #2d6a4f;        /* deep forest green */
-      --pine-mid:   #52976e;        /* mid pine */
-      --pine-light: #95c9a8;        /* sage */
-      --pine-dim:   rgba(45,106,79,0.10);
-      --stone:      #8b6914;        /* warm amber/ochre */
-      --stone-light:#c4924a;
-      --stone-dim:  rgba(139,105,20,0.10);
-      --sky:        #4a7fa5;        /* alpine sky blue */
-      --text:       #1a1f1c;        /* near-black with green undertone */
-      --text-dim:   #4a5548;        /* mid readable */
-      --text-muted: #8a9488;        /* labels */
-      --mono:       'JetBrains Mono', monospace;
-      --sans:       'DM Sans', system-ui, sans-serif;
-      --disp:       'Lora', Georgia, serif;
-      --radius:     14px;
-      --shadow:     0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
-    }
-
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; }
-
-    /* parchment grain */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-      background-size: 200px 200px;
-      pointer-events: none; z-index: 0;
-    }
-
-    .app {
-      display: grid;
-      grid-template-columns: 290px 1fr;
-      height: 100vh;
-      position: relative; z-index: 1;
-    }
-
-    /* ── Sidebar ── */
-    .sidebar {
-      background: var(--surface);
-      border-right: 1px solid var(--border2);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Mountain illustration at bottom of sidebar */
-    .sidebar-mountain {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      pointer-events: none;
-    }
-
-    .identity {
-      padding: 28px 22px 20px;
-      border-bottom: 1px solid var(--border);
-      position: relative; z-index: 1;
-    }
-
-    .id-avatar {
-      width: 52px; height: 52px;
-      border-radius: 13px;
-      background: linear-gradient(145deg, var(--pine), #1a4030);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--disp);
-      font-size: 18px; font-weight: 600;
-      color: #fff;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow);
-    }
-
-    .id-name {
-      font-family: var(--disp);
-      font-size: 19px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.2px;
-      line-height: 1.2;
-    }
-
-    .id-role {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--pine-mid);
-      margin-top: 4px;
-      letter-spacing: 0.4px;
-    }
-
-    /* High Camp logo bar */
-    .hc-brand {
-      padding: 14px 22px 13px;
-      border-bottom: 1px solid var(--border2);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--pine);
-    }
-
-    .hc-logo {
-      font-family: var(--disp);
-      font-size: 15px;
-      font-weight: 600;
-      color: #fff;
-      letter-spacing: -0.2px;
-      line-height: 1;
-    }
-
-    .hc-logo sup {
-      font-family: var(--mono);
-      font-size: 8px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      opacity: 0.75;
-      vertical-align: super;
-      margin-left: 2px;
-      text-transform: uppercase;
-    }
-
-    .hc-divider {
-      width: 1px; height: 16px;
-      background: rgba(255,255,255,0.25);
-    }
-
-    .hc-tagline {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: rgba(255,255,255,0.65);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      line-height: 1.3;
-    }
-
-    .id-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 3px 8px;
-      border-radius: 20px;
-      margin-top: 10px;
-    }
-
-    .id-status-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--pine-mid);
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
-    /* scroll area */
-    .sb-scroll {
-      flex: 1;
-      overflow-y: auto;
-      scrollbar-width: none;
-      position: relative; z-index: 1;
-    }
-    .sb-scroll::-webkit-scrollbar { display: none; }
-
-    .sb-block {
-      padding: 16px 22px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .sb-label {
-      font-family: var(--mono);
-      font-size: 9.5px;
-      text-transform: uppercase;
-      letter-spacing: 1.8px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      display: flex; align-items: center; gap: 8px;
-    }
-
-    .sb-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    /* stat grid */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-    }
-
-    .stat-card {
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 11px 12px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .stat-card:hover {
-      border-color: var(--pine-light);
-      box-shadow: 0 2px 8px rgba(45,106,79,0.08);
-    }
-
-    .stat-val {
-      font-family: var(--disp);
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1;
-    }
-    .stat-val small { font-size: 12px; color: var(--pine-mid); font-weight: 500; font-style: normal; }
-
-    .stat-lbl {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 4px;
-    }
-
-    /* tags */
-    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
-
-    .tag {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      padding: 4px 9px;
-      border-radius: 20px;
-      border: 1px solid var(--border2);
-      color: var(--text-dim);
-      font-weight: 500;
-      background: var(--bg);
-    }
-
-    .tag.p {
-      background: var(--pine-dim);
-      border-color: rgba(45,106,79,0.25);
-      color: var(--pine);
-    }
-
-    .tag.s {
-      background: var(--stone-dim);
-      border-color: rgba(139,105,20,0.22);
-      color: var(--stone);
-    }
-
-    /* highlights */
-    .highlights { display: flex; flex-direction: column; gap: 9px; }
-
-    .highlight-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      font-size: 12.5px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    .highlight-icon {
-      width: 20px; height: 20px;
-      border-radius: 6px;
-      background: var(--pine-dim);
-      border: 1px solid rgba(45,106,79,0.2);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-      font-size: 11px;
-    }
-
-    /* footer */
-    .sb-footer {
-      padding: 14px 22px;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      font-family: var(--mono);
-      line-height: 1.6;
-      position: relative; z-index: 1;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    /* ── Chat ── */
-    .chat {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      background: var(--bg);
-      position: relative;
-    }
-
-    /* mountain panorama behind chat */
-    .chat-panorama {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 280px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 1;
-    }
-
-    .chat-header {
-      padding: 20px 28px 16px;
-      border-bottom: 1px solid var(--border2);
-      flex-shrink: 0;
-      background: var(--surface);
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      position: relative; z-index: 1;
-      box-shadow: 0 1px 0 var(--border);
-    }
-
-    .chat-header h1 {
-      font-family: var(--disp);
-      font-size: 21px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.25;
-    }
-
-    .chat-header h1 em {
-      font-style: italic;
-      color: var(--pine);
-    }
-
-    .chat-header p {
-      margin-top: 4px;
-      font-size: 13.5px;
-      color: var(--text-dim);
-    }
-
-    /* chat header brand strip */
-    .chat-brand-strip {
-      background: var(--pine);
-      padding: 7px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .chat-brand-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chat-brand-name {
-      font-family: var(--disp);
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      letter-spacing: -0.1px;
-    }
-
-    .chat-brand-name sup {
-      font-family: var(--mono);
-      font-size: 7px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      opacity: 0.7;
-      vertical-align: super;
-      margin-left: 2px;
-      text-transform: uppercase;
-    }
-
-    .chat-brand-sep { width: 1px; height: 14px; background: rgba(255,255,255,0.25); }
-
-    .chat-brand-tag {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-    }
-
-    .chat-brand-right {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--mono);
-      font-size: 9.5px;
-      color: rgba(255,255,255,0.6);
-    }
-
-    .chat-brand-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: #a8e6b8;
-      box-shadow: 0 0 6px rgba(168,230,184,0.7);
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-
-    .model-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-muted);
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      padding: 6px 10px;
-      border-radius: 20px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .model-badge-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--pine-mid);
-    }
-
-    /* messages */
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border2) transparent;
-      position: relative; z-index: 1;
-    }
-
-    #messages::-webkit-scrollbar { width: 4px; }
-    #messages::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
-
-    .msg {
-      display: flex;
-      gap: 12px;
-      animation: msgIn 0.22s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .msg.user { flex-direction: row-reverse; }
-
-    .msg-avatar {
-      width: 32px; height: 32px;
-      border-radius: 9px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 500;
-      margin-top: 1px;
-    }
-
-    .msg.bot .msg-avatar {
-      background: linear-gradient(135deg, var(--pine), #1a4030);
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(45,106,79,0.25);
-    }
-
-    .msg.user .msg-avatar {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--text-dim);
-    }
-
-    .msg-content { max-width: min(580px, calc(100% - 52px)); }
-
-    .msg-meta-line {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 5px;
-    }
-    .msg.user .msg-meta-line { flex-direction: row-reverse; }
-
-    .msg-sender {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 600;
-    }
-    .msg.bot  .msg-sender { color: var(--pine); }
-    .msg.user .msg-sender { color: var(--stone); }
-
-    .msg-time {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-
-    .msg-bubble {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14.5px;
-      line-height: 1.72;
-    }
-
-    .msg.bot .msg-bubble {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-left: 3px solid var(--pine-mid);
-      border-top-left-radius: 3px;
-      color: var(--text);
-      box-shadow: var(--shadow);
-    }
-
-    .msg.user .msg-bubble {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-right: 3px solid var(--stone-light);
-      border-top-right-radius: 3px;
-      color: var(--text);
-    }
-
-    .msg-bubble p + p { margin-top: 8px; }
-    .msg-bubble strong { color: var(--text); font-weight: 600; }
-
-    /* typing / status */
-    .typing-status {
-      display: inline-flex; align-items: center; gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px; letter-spacing: 0.04em;
-      color: var(--pine-mid);
-    }
-    .typing-status .pulse {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--pine-mid);
-      box-shadow: 0 0 0 0 rgba(45,106,79,0.6);
-      animation: tpulse 1.4s ease-out infinite;
-      flex-shrink: 0;
-    }
-    .typing-status .label {
-      opacity: 0; transform: translateY(2px);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    .typing-status .label.in { opacity: 1; transform: translateY(0); }
-    @keyframes tpulse {
-      0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.55); transform: scale(1); }
-      70%  { box-shadow: 0 0 0 8px rgba(45,106,79,0);  transform: scale(1.05); }
-      100% { box-shadow: 0 0 0 0 rgba(45,106,79,0);    transform: scale(1); }
-    }
-
-    /* starters */
-    .starters-area {
-      padding: 0 28px 12px;
-      flex-shrink: 0;
-      position: relative; z-index: 1;
-    }
-
-    .starters-label {
-      font-family: var(--mono);
-      font-size: 9.5px;
-      text-transform: uppercase;
-      letter-spacing: 1.8px;
-      color: var(--text-muted);
-      margin-bottom: 7px;
-    }
-
-    .starters-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .starter {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      color: var(--text-dim);
-      font-size: 12.5px;
-      font-family: var(--sans);
-      padding: 9px 13px;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      text-align: left;
-      line-height: 1.4;
-    }
-
-    .starter:hover {
-      border-color: var(--pine-light);
-      background: var(--pine-dim);
-      color: var(--text);
-    }
-
-    /* input */
-    .input-wrap {
-      flex-shrink: 0;
-      padding: 0 28px 22px;
-      position: relative; z-index: 1;
-    }
-
-    .input-box {
-      display: flex;
-      gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 11px 13px;
-      box-shadow: var(--shadow);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .input-box:focus-within {
-      border-color: var(--pine-light);
-      box-shadow: 0 0 0 3px rgba(45,106,79,0.09), var(--shadow);
-    }
-
-    #userInput {
-      flex: 1;
-      background: none;
-      border: none; outline: none;
-      color: var(--text);
-      font-size: 14px;
-      font-family: var(--sans);
-      resize: none;
-      max-height: 120px;
-      line-height: 1.55;
-    }
-
-    #userInput::placeholder { color: var(--text-muted); }
-
-    #sendBtn {
-      align-self: flex-end;
-      width: 34px; height: 34px;
-      border-radius: 9px;
-      background: var(--pine);
-      border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-    }
-
-    #sendBtn:hover {
-      background: var(--pine-mid);
-      box-shadow: 0 3px 12px rgba(45,106,79,0.3);
-    }
-
-    #sendBtn:active { transform: scale(0.93); }
-    #sendBtn:disabled { background: var(--surface3); cursor: not-allowed; box-shadow: none; }
-
-    .hint {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: center;
-      margin-top: 7px;
-    }
-
-    .privacy {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: center;
-      margin-top: 6px;
-      line-height: 1.5;
-    }
-
-    /* responsive */
-    @media (max-width: 760px) {
-      body { overflow: auto; }
-      .app {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        height: auto;
-        min-height: 100vh;
-        /* chat first on mobile */
-        display: flex;
-        flex-direction: column;
-      }
-      /* put chat panel first visually */
-      .chat { order: -1; min-height: 100svh; display: flex; flex-direction: column; }
-      .sidebar { order: 1; border-right: none; border-top: 1px solid var(--border2); }
-      /* hide decorative mountain bg on mobile to save space */
-      .chat-panorama { display: none; }
-      /* hide sidebar mountain behind fold */
-      .sidebar-mountain { height: 140px; }
-      .hc-brand { display: none; } /* already visible in chat header badge */
-      /* compact sidebar */
-      .stat-grid { grid-template-columns: repeat(4,1fr); }
-      .starters-grid { grid-template-columns: 1fr; }
-      .chat-header { flex-direction: row; align-items: center; padding: 14px 18px 12px; }
-      .chat-header h1 { font-size: 16px; }
-      .chat-header p { font-size: 12px; margin-top: 2px; }
-      #messages { padding: 14px 18px; flex: 1; }
-      .starters-area { padding-left: 18px; padding-right: 18px; }
-      .input-wrap { padding: 0 18px 18px; }
+    :root{
+      --ink:#ffffff; --ink-2:#f4f4f2; --paper:#fafaf9; --paper-2:#e8e8e4;
+      --summit:#0f1614; --slate:#8a9088; --slate-2:#3d4a44;
+      --pine:#1a4030; --copper:#2d6a4f; --copper-glow:rgba(45,106,79,.14);
+      --line:rgba(45,106,79,.14);
+      --display:'Spectral',Georgia,serif;
+      --sans:'Archivo','Helvetica Neue',sans-serif;
+      --mono:'Spline Sans Mono',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--ink);color:var(--summit);font-family:var(--sans);line-height:1.6;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+    }
+    ::selection{background:var(--copper);color:var(--ink)}
+    a{color:inherit}
+
+    /* ===== NAV ===== */
+    nav{
+      flex:none;display:flex;align-items:center;justify-content:space-between;
+      padding:16px 28px;border-bottom:1px solid rgba(255,255,255,.12);
+      background:var(--copper);
+      z-index:10;
+    }
+    .nav-left{display:flex;align-items:center;gap:16px}
+    .hm{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+    .hm .wm{font-family:var(--display);font-weight:600;font-size:1.02rem;letter-spacing:.01em}
+    .nav-div{width:1px;height:26px;background:rgba(255,255,255,.28)}
+    .hc-ctx{display:flex;align-items:center;gap:9px}
+    .hc-ctx .nm{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+    .nav-right{display:flex;align-items:center;gap:20px}
+    .back{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;opacity:.85;transition:opacity .2s}
+    .back:hover{opacity:1}
+    @media(max-width:600px){
+      nav{padding:14px 18px}
+      .hm .wm{display:none}
+      .nav-right .back-long{display:none}
+    }
+    @media(max-width:380px){
+      .nav-right .back{font-size:0}
+      .nav-right .back::before{content:"\2190";font-size:.95rem;color:var(--ink)}
+    }
+
+    /* ===== THREAD ===== */
+    .thread{flex:1;overflow-y:auto;position:relative}
+    .thread-inner{max-width:780px;margin:0 auto;padding:48px 28px 24px}
+    .ridge{position:fixed;left:0;right:0;bottom:78px;height:200px;z-index:0;opacity:.4;pointer-events:none}
+
+    .msg{display:flex;gap:14px;margin-bottom:30px;position:relative;z-index:1;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
+    .msg.enter{transform:translateY(10px)}
+    @media(prefers-reduced-motion:reduce){.msg{transition:none}.msg.enter{transform:none}}
+
+    .avatar{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .avatar.hc{background:var(--copper)}
+    .avatar.me{background:var(--ink-2);border:1px solid var(--line)}
+    .avatar.me span{font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;color:var(--slate-2)}
+
+    .bubble{flex:1;min-width:0}
+    .who{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--slate-2);margin-bottom:8px}
+    .msg.user{flex-direction:row-reverse}
+    .msg.user .bubble{display:flex;justify-content:flex-end}
+    .msg.user .utext{
+      background:var(--ink-2);border:1px solid var(--line);border-radius:3px;
+      padding:13px 17px;font-size:.98rem;color:var(--summit);max-width:80%;
+      line-height:1.55;white-space:pre-wrap;word-wrap:break-word;
+    }
+    .atext{font-size:1.02rem;color:var(--slate-2);line-height:1.62}
+    .atext strong{color:var(--summit);font-weight:600}
+    .atext em{font-style:italic}
+    .atext p{margin-bottom:13px}
+    .atext p:last-child{margin-bottom:0}
+    .atext ul, .atext ol{list-style:none;padding-left:0;margin:10px 0}
+    .atext li{position:relative;padding-left:18px;margin-bottom:6px}
+    .atext li::before{content:"\2013";position:absolute;left:0;color:var(--copper);font-weight:500}
+    .atext a{color:var(--copper);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--copper-glow)}
+
+    /* suggestion chips */
+    .suggest{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+    .schip{
+      font-family:var(--sans);font-size:.86rem;color:var(--slate-2);
+      background:var(--ink);border:1px solid var(--line);border-radius:999px;
+      padding:9px 16px;cursor:pointer;transition:border-color .2s,color .2s;line-height:1.3;
+    }
+    .schip:hover{border-color:var(--copper);color:var(--copper)}
+
+    /* typing indicator */
+    .typing{display:inline-flex;gap:5px;align-items:center;padding:6px 0}
+    .typing i{width:7px;height:7px;border-radius:50%;background:var(--copper);opacity:.4;animation:blink 1.2s infinite}
+    .typing i:nth-child(2){animation-delay:.2s}
+    .typing i:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+    @media(prefers-reduced-motion:reduce){.typing i{animation:none;opacity:.6}}
+
+    /* ===== COMPOSER ===== */
+    .composer-wrap{flex:none;border-top:1px solid var(--line);background:rgba(255,255,255,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10}
+    .composer{max-width:780px;margin:0 auto;padding:16px 28px 10px}
+    .composer form{
+      display:flex;align-items:flex-end;gap:12px;
+      border:1px solid var(--line);border-radius:4px;padding:8px 8px 8px 16px;
+      background:var(--ink);transition:border-color .2s,box-shadow .2s;
+    }
+    .composer form:focus-within{border-color:var(--copper);box-shadow:0 0 0 3px var(--copper-glow)}
+    .composer textarea{
+      flex:1;border:none;outline:none;resize:none;
+      font-family:var(--sans);font-size:1rem;color:var(--summit);
+      line-height:1.5;background:transparent;max-height:160px;padding:7px 0;
+    }
+    .composer textarea::placeholder{color:var(--slate-2);opacity:.7}
+    .send{
+      flex:none;width:42px;height:42px;border-radius:3px;border:none;
+      background:var(--copper);color:var(--ink);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .2s,opacity .2s;
+    }
+    .send:hover:not(:disabled){background:var(--pine)}
+    .send:disabled{opacity:.4;cursor:default}
+    .disclaimer{
+      max-width:780px;margin:0 auto;padding:0 28px 12px;
+      font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
+      color:var(--slate-2);text-align:center;line-height:1.5;
+    }
+    @media(max-width:600px){
+      .composer{padding:12px 18px 8px}
+      .disclaimer{padding:0 18px 10px}
     }
   </style>
 </head>
 <body>
 
-<div class="app">
-
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
-
-    <!-- High Camp brand bar -->
-    <div class="hc-brand">
-      <div class="hc-logo">⛰ High Camp<sup>AI</sup></div>
-      <div class="hc-divider"></div>
-      <div class="hc-tagline">Gen AI · Career Intelligence</div>
-    </div>
-
-    <svg class="sidebar-mountain" viewBox="0 0 290 220" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
-      <!-- sky wash -->
-      <defs>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#c8dfe8" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#e8f0ea" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="mtn1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3a6b4e"/>
-          <stop offset="100%" stop-color="#2a5240"/>
-        </linearGradient>
-        <linearGradient id="mtn2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4e7d62"/>
-          <stop offset="100%" stop-color="#3a6050"/>
-        </linearGradient>
-      </defs>
-      <rect width="290" height="220" fill="url(#skyGrad)"/>
-      <!-- far range -->
-      <polygon points="-10,220 30,140 70,165 110,105 150,145 190,95 230,130 270,80 310,115 310,220" fill="#b8cec0" opacity="0.5"/>
-      <!-- snow far -->
-      <polygon points="110,105 100,128 120,128" fill="white" opacity="0.7"/>
-      <polygon points="190,95 181,116 199,116" fill="white" opacity="0.6"/>
-      <polygon points="270,80 260,105 280,105" fill="white" opacity="0.65"/>
-      <!-- mid range -->
-      <polygon points="-10,220 20,165 60,185 100,130 140,168 180,118 220,158 265,108 310,140 310,220" fill="url(#mtn1)" opacity="0.7"/>
-      <!-- snow mid -->
-      <polygon points="100,130 91,152 109,152" fill="white" opacity="0.8"/>
-      <polygon points="180,118 172,140 188,140" fill="white" opacity="0.75"/>
-      <!-- near range -->
-      <polygon points="-10,220 10,190 50,200 90,172 130,195 170,165 210,188 250,158 290,178 290,220" fill="url(#mtn2)" opacity="0.9"/>
-      <!-- trees silhouette -->
-      <g fill="#1d4a30" opacity="0.6">
-        <rect x="5" y="205" width="3" height="12"/>
-        <polygon points="6.5,196 3,206 10,206"/>
-        <rect x="18" y="207" width="2.5" height="10"/>
-        <polygon points="19.2,199 16,208 22.5,208"/>
-        <rect x="58" y="204" width="3" height="14"/>
-        <polygon points="59.5,194 56,205 63,205"/>
-        <rect x="240" y="206" width="3" height="12"/>
-        <polygon points="241.5,197 238,207 245,207"/>
-        <rect x="258" y="208" width="2.5" height="10"/>
-        <polygon points="259.2,200 256,209 262.5,209"/>
-        <rect x="275" y="205" width="3" height="13"/>
-        <polygon points="276.5,196 273,206 280,206"/>
-      </g>
-    </svg>
-
-    <div class="identity">
-      <div class="id-avatar">RM</div>
-      <div class="id-name">Rob McKinney</div>
-      <div class="id-role">CPO · COO · Executive Leader</div>
-      <div class="id-status">
-        <div class="id-status-dot"></div>
-        high-camp · active
-      </div>
-    </div>
-
-    <div class="sb-scroll">
-
-      <div class="sb-block">
-        <div class="sb-label">Profile</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-val">30</div>
-            <div class="stat-lbl">Years Experience</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val">0 – $1B+</div>
-            <div class="stat-lbl">Corp Scale</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" style="font-size:14px;line-height:1.3">Denver<br><span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">Colorado</span></div>
-            <div class="stat-lbl">Location</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" style="font-size:14px;line-height:1.3">Veteran</div>
-            <div class="stat-lbl">Naval Intelligence</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sb-block">
-        <div class="sb-label">Highlights</div>
-        <div class="highlights">
-          <div class="highlight-row">
-            <div class="highlight-icon">🤖</div>
-            Gen AI practitioner — building &amp; deploying AI-native products
-          </div>
-          <div class="highlight-row">
-            <div class="highlight-icon">🏔</div>
-            Led product &amp; tech across startups and Fortune 150 companies
-          </div>
-          <div class="highlight-row">
-            <div class="highlight-icon">🌲</div>
-            Deep experience in healthcare, SaaS &amp; regulated industries
-          </div>
-          <div class="highlight-row">
-            <div class="highlight-icon">🦅</div>
-            Built &amp; scaled cross-functional teams of 100+
-          </div>
-        </div>
-      </div>
-
-      <div class="sb-block">
-        <div class="sb-label">Domains</div>
-        <div class="tags">
-          <span class="tag p">Gen AI</span>
-          <span class="tag p">Product Strategy</span>
-          <span class="tag p">Operations</span>
-          <span class="tag s">Healthcare</span>
-          <span class="tag s">SaaS</span>
-          <span class="tag">Startups</span>
-          <span class="tag">Enterprise</span>
-          <span class="tag">P&L</span>
-          <span class="tag">Org Design</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="sb-footer">
-      Powered by High Camp AI · trained on<br>Rob's full career &amp; Gen AI experience.
-    </div>
-  </aside>
-
-  <!-- ── Chat ── -->
-  <div class="chat">
-
-    <!-- mountain panorama in chat bg -->
-    <svg class="chat-panorama" viewBox="0 0 980 280" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="chatSky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#d0e8f0" stop-opacity="0.55"/>
-          <stop offset="100%" stop-color="#e8f0ea" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="chatMtn" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4e7d62"/>
-          <stop offset="100%" stop-color="#2d5a42"/>
-        </linearGradient>
-      </defs>
-      <rect width="980" height="280" fill="url(#chatSky)"/>
-      <!-- far snow range -->
-      <polygon points="-20,280 80,120 160,165 280,55 400,130 500,70 600,125 700,45 800,105 900,35 1000,85 1000,280" fill="#b8cec0" opacity="0.4"/>
-      <!-- snow caps far -->
-      <polygon points="280,55 262,98 298,98" fill="white" opacity="0.75"/>
-      <polygon points="500,70 484,110 516,110" fill="white" opacity="0.7"/>
-      <polygon points="700,45 681,92 719,92" fill="white" opacity="0.75"/>
-      <polygon points="900,35 880,86 920,86" fill="white" opacity="0.72"/>
-      <!-- mid range -->
-      <polygon points="-20,280 60,180 140,215 230,145 340,185 430,130 540,170 640,105 740,155 840,90 950,140 1000,120 1000,280" fill="url(#chatMtn)" opacity="0.5"/>
-      <!-- snow mid -->
-      <polygon points="230,145 218,172 242,172" fill="white" opacity="0.85"/>
-      <polygon points="430,130 419,155 441,155" fill="white" opacity="0.82"/>
-      <polygon points="640,105 628,135 652,135" fill="white" opacity="0.85"/>
-      <polygon points="840,90 827,120 853,120" fill="white" opacity="0.82"/>
-      <!-- near treeline -->
-      <g fill="#2d5a3a" opacity="0.35">
-        <polygon points="0,280 0,248 14,228 28,248 42,222 56,245 70,230 84,250 98,235 112,255 126,238 140,258 140,280"/>
-        <polygon points="820,280 820,252 834,234 848,252 862,238 876,256 890,242 904,260 918,244 932,262 946,246 960,264 980,252 980,280"/>
-      </g>
-    </svg>
-
-    <div class="chat-header">
-      <div>
-        <h1>Is Rob right for <em>your role?</em></h1>
-        <p>A Gen AI leader &amp; executive — ask me anything about his fit for your role.</p>
-      </div>
-      <div class="model-badge">
-        <div class="model-badge-dot"></div>
-        High Camp · online
-      </div>
-    </div>
-
-    <div id="messages"></div>
-
-    <div class="starters-area" id="startersWrap">
-      <div class="starters-label">Suggested</div>
-      <div class="starters-grid" id="starters">
-        <button class="starter">We're hiring a CPO at an early-stage startup</button>
-        <button class="starter">How deep is his hands-on GenAI experience?</button>
-        <button class="starter">Tell me about his leadership style</button>
-        <button class="starter">How was this widget built?</button>
-      </div>
-    </div>
-
-    <div class="input-wrap">
-      <div class="input-box">
-        <textarea
-          id="userInput"
-          rows="1"
-          placeholder="Paste a job description or ask anything about Rob…"
-        ></textarea>
-        <button id="sendBtn" aria-label="Send">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="white"/>
-          </svg>
-        </button>
-      </div>
-      <div class="hint">↵ send · ⇧↵ new line</div>
-      <div class="privacy">Conversations are logged and forwarded to Rob — please don't share confidential information.</div>
-    </div>
-
+<nav>
+  <div class="nav-left">
+    <a class="hm" href="https://hollismountain.com" title="Back to Hollis Mountain">
+      <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M2 22 L9 8 L13 15 L17 4 L24 22 Z" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M9 8 L11 11 L13 9" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" opacity=".55"/>
+      </svg>
+      <span class="wm">Hollis Mountain</span>
+    </a>
+    <span class="nav-div"></span>
+    <span class="hc-ctx">
+      <svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+      </svg>
+      <span class="nm">High Camp</span>
+    </span>
   </div>
+  <div class="nav-right">
+    <a class="back" href="https://hollismountain.com"><span class="back-long">← Back to </span>Hollis Mountain</a>
+  </div>
+</nav>
+
+<div class="thread" id="thread">
+  <svg class="ridge" viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path d="M0 200 L0 120 L160 60 L320 110 L470 40 L640 100 L820 30 L1000 95 L1200 50 L1440 110 L1440 200 Z" fill="#e3eae4"/>
+    <path d="M0 200 L0 150 L200 120 L420 150 L640 110 L880 150 L1120 120 L1440 150 L1440 200 Z" fill="#cfdad2"/>
+  </svg>
+  <div class="thread-inner" id="threadInner"></div>
+</div>
+
+<div class="composer-wrap">
+  <div class="composer">
+    <form id="composer">
+      <textarea
+        id="input"
+        rows="1"
+        placeholder="Paste a job description, a title, or a few details…"
+        autocomplete="off"
+      ></textarea>
+      <button class="send" id="send" type="submit" aria-label="Send" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12 L19 12 M13 6 L19 12 L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+  <div class="disclaimer">Conversations are logged and forwarded to Rob — please don't share confidential information.</div>
 </div>
 
 <script>
-  const messagesEl   = document.getElementById('messages');
-  const inputEl      = document.getElementById('userInput');
-  const sendBtn      = document.getElementById('sendBtn');
-  const startersWrap = document.getElementById('startersWrap');
-  const history = [];
-  let isLoading = false;
+  (function () {
+    const inner   = document.getElementById('threadInner');
+    const thread  = document.getElementById('thread');
+    const form    = document.getElementById('composer');
+    const input   = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
 
-  function autoResize() {
-    inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-  }
+    const FLAG = '<svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true">'
+               + '<path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#fafaf9" stroke-width="1.7" stroke-linejoin="round"/>'
+               + '<path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#fafaf9" stroke="#fafaf9" stroke-width="1" stroke-linejoin="round"/>'
+               + '</svg>';
 
-  function ts() {
-    return new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: false });
-  }
+    const history = [];
+    let busy = false;
+    let suggestRemoved = false;
 
-  function formatText(t) {
-    return t
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g,'<em>$1</em>')
-      .replace(/\n\n/g,'</p><p>')
-      .replace(/\n/g,'<br>')
-      .replace(/^/,'<p>').replace(/$/,'</p>');
-  }
-
-  function renderMessage(role, text) {
-    const msg = document.createElement('div');
-    msg.className = `msg ${role}`;
-
-    const avatar = document.createElement('div');
-    avatar.className = 'msg-avatar';
-    avatar.textContent = role === 'bot' ? 'RM' : 'You';
-
-    const content = document.createElement('div');
-    content.className = 'msg-content';
-
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta-line';
-    meta.innerHTML = `<span class="msg-sender">${role === 'bot' ? 'High Camp' : 'you'}</span><span class="msg-time">${ts()}</span>`;
-
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.innerHTML = formatText(text);
-
-    content.appendChild(meta);
-    content.appendChild(bubble);
-    msg.appendChild(avatar);
-    msg.appendChild(content);
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return msg;
-  }
-
-  function renderTyping(phases) {
-    const msg = document.createElement('div');
-    msg.className = 'msg bot'; msg.id = 'typing';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'msg-avatar'; avatar.textContent = 'RM';
-
-    const content = document.createElement('div');
-    content.className = 'msg-content';
-
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta-line';
-    meta.innerHTML = '<span class="msg-sender">High Camp</span>';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.innerHTML = '<div class="typing-status"><span class="pulse"></span><span class="label"></span></div>';
-
-    content.appendChild(meta);
-    content.appendChild(bubble);
-    msg.appendChild(avatar);
-    msg.appendChild(content);
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-
-    // Cycle through status phases. Last phase sticks until response arrives.
-    const labelEl = bubble.querySelector('.label');
-    const steps = phases && phases.length ? phases : [
-      'Researching background',
-      'Matching experience to role',
-      'Running fit analysis',
-      'Drafting response',
-    ];
-    let i = 0;
-    const setLabel = (txt) => {
-      labelEl.classList.remove('in');
-      setTimeout(() => {
-        labelEl.textContent = txt + '…';
-        labelEl.classList.add('in');
-      }, 180);
-    };
-    setLabel(steps[0]);
-    msg._interval = setInterval(() => {
-      if (i < steps.length - 1) {
-        i++;
-        setLabel(steps[i]);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      }
-    }, 1800);
-
-    const origRemove = msg.remove.bind(msg);
-    msg.remove = () => { clearInterval(msg._interval); origRemove(); };
-    return msg;
-  }
-
-  async function send(text) {
-    if (!text.trim() || isLoading) return;
-    startersWrap.style.display = 'none';
-    isLoading = true; sendBtn.disabled = true;
-    history.push({ role: 'user', content: text });
-    renderMessage('user', text);
-    inputEl.value = ''; autoResize();
-    const hasUrl = /https?:\/\/\S+/i.test(text);
-    const isRoleQuery = /\b(role|job|position|hiring|hire|fit|cpo|coo|cto|ceo|vp|director|manager|company|startup|description)\b/i.test(text);
-    let phases;
-    if (hasUrl) {
-      phases = ['Fetching link', 'Reading page content', 'Matching to Rob\u2019s experience', 'Drafting response'];
-    } else if (isRoleQuery) {
-      phases = ['Reviewing background', 'Matching experience to role', 'Drafting response'];
-    } else {
-      phases = ['Reviewing background', 'Pulling relevant context', 'Drafting response'];
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
     }
-    const typing = renderTyping(phases);
-    try {
-      const res = await fetch('/.netlify/functions/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-40) }),
+
+    function formatText(t) {
+      return esc(t)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(?<!\w)\*([^\*\n]+?)\*(?!\w)/g, '<em>$1</em>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^/, '<p>').replace(/$/, '</p>');
+    }
+
+    function scrollDown() {
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function enterAnim(el) {
+      el.classList.add('enter');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('enter')));
+      setTimeout(() => el.classList.remove('enter'), 140);
+    }
+
+    function userMsg(text) {
+      const el = document.createElement('div');
+      el.className = 'msg user';
+      el.innerHTML =
+        '<div class="avatar me"><span>YOU</span></div>'
+        + '<div class="bubble"><div class="utext">' + esc(text) + '</div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
+      scrollDown();
+    }
+
+    function hcShell() {
+      const el = document.createElement('div');
+      el.className = 'msg hc';
+      el.innerHTML =
+        '<div class="avatar hc">' + FLAG + '</div>'
+        + '<div class="bubble"><div class="who">High Camp</div><div class="body"></div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
+      return el;
+    }
+
+    function botMsg(text) {
+      const el = hcShell();
+      el.querySelector('.body').innerHTML = '<div class="atext">' + formatText(text) + '</div>';
+      scrollDown();
+      return el;
+    }
+
+    function typing() {
+      // Bare typing row — no "HIGH CAMP" eyebrow, matches the design intent.
+      const el = document.createElement('div');
+      el.className = 'msg hc';
+      el.innerHTML =
+        '<div class="avatar hc">' + FLAG + '</div>'
+        + '<div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div>';
+      inner.appendChild(el);
+      enterAnim(el);
+      scrollDown();
+      return el;
+    }
+
+    function removeSuggestionsOnFirstSend() {
+      if (suggestRemoved) return;
+      const sug = inner.querySelector('.suggest');
+      if (sug) sug.remove();
+      suggestRemoved = true;
+    }
+
+    async function submit(text) {
+      text = (text || '').trim();
+      if (!text || busy) return;
+      removeSuggestionsOnFirstSend();
+      busy = true;
+      updateSend();
+      userMsg(text);
+      history.push({ role: 'user', content: text });
+      input.value = '';
+      autosize();
+
+      const typingEl = typing();
+      try {
+        const res = await fetch('/.netlify/functions/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.slice(-40) }),
+        });
+        const data = await res.json();
+        typingEl.remove();
+        if (data.error) {
+          botMsg('Error: ' + data.error);
+        } else {
+          history.push({ role: 'assistant', content: data.content });
+          botMsg(data.content);
+        }
+      } catch {
+        typingEl.remove();
+        botMsg('Network error — please check your connection.');
+      }
+      busy = false;
+      updateSend();
+      input.focus();
+    }
+
+    function autosize() {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+    }
+    function updateSend() {
+      sendBtn.disabled = busy || !input.value.trim();
+    }
+
+    input.addEventListener('input', () => { autosize(); updateSend(); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input.value); }
+    });
+    form.addEventListener('submit', e => { e.preventDefault(); submit(input.value); });
+
+    // Initial greeting
+    (async () => {
+      await new Promise(r => setTimeout(r, 250));
+      const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
+      history.push({ role: 'assistant', content: greeting });
+      const el = hcShell();
+      const body = el.querySelector('.body');
+      const chips = [
+        "We're hiring a CPO at an early-stage startup",
+        'How deep is his hands-on GenAI experience?',
+        'Tell me about his leadership style',
+        'How was this widget built?',
+      ];
+      let html = '<div class="atext">' + formatText(greeting) + '</div>';
+      html += '<div class="suggest">';
+      chips.forEach(c => { html += '<button class="schip" type="button">' + esc(c) + '</button>'; });
+      html += '</div>';
+      body.innerHTML = html;
+      body.querySelectorAll('.schip').forEach(chip => {
+        chip.addEventListener('click', () => submit(chip.textContent));
       });
-      const data = await res.json();
-      typing.remove();
-      if (data.error) {
-        renderMessage('bot', 'Error: ' + data.error);
-      } else {
-        history.push({ role: 'assistant', content: data.content });
-        renderMessage('bot', data.content);
-      }
-    } catch {
-      typing.remove();
-      renderMessage('bot', 'Network error — please check your connection.');
-    }
-    isLoading = false; sendBtn.disabled = false; inputEl.focus();
-  }
-
-  inputEl.addEventListener('input', autoResize);
-  inputEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(inputEl.value); }
-  });
-  sendBtn.addEventListener('click', () => send(inputEl.value));
-  document.querySelectorAll('.starter').forEach(b => b.addEventListener('click', () => send(b.textContent.trim())));
-
-  (async () => {
-    await new Promise(r => setTimeout(r, 300));
-    const greeting = "Hi — I'm High Camp, a career intelligence tool built on Rob McKinney's full professional background.\n\nShare the role you're exploring — a job description, a title, or just a few details — and I'll give you an honest picture of how Rob's experience maps to what you're looking for.";
-    history.push({ role: 'assistant', content: greeting });
-    renderMessage('bot', greeting);
+      scrollDown();
+      input.focus();
+    })();
   })();
 </script>
 
