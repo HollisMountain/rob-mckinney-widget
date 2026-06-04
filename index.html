@@ -32,18 +32,19 @@
     /* ===== NAV ===== */
     nav{
       flex:none;display:flex;align-items:center;justify-content:space-between;
-      padding:16px 28px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.92);
-      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10;
+      padding:16px 28px;border-bottom:1px solid rgba(255,255,255,.12);
+      background:var(--copper);
+      z-index:10;
     }
     .nav-left{display:flex;align-items:center;gap:16px}
-    .hm{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--summit)}
+    .hm{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
     .hm .wm{font-family:var(--display);font-weight:600;font-size:1.02rem;letter-spacing:.01em}
-    .nav-div{width:1px;height:26px;background:var(--line)}
+    .nav-div{width:1px;height:26px;background:rgba(255,255,255,.28)}
     .hc-ctx{display:flex;align-items:center;gap:9px}
-    .hc-ctx .nm{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--copper)}
+    .hc-ctx .nm{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
     .nav-right{display:flex;align-items:center;gap:20px}
-    .back{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-2);text-decoration:none;transition:color .2s}
-    .back:hover{color:var(--summit)}
+    .back{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;opacity:.85;transition:opacity .2s}
+    .back:hover{opacity:1}
     @media(max-width:600px){
       nav{padding:14px 18px}
       .hm .wm{display:none}
@@ -51,7 +52,7 @@
     }
     @media(max-width:380px){
       .nav-right .back{font-size:0}
-      .nav-right .back::before{content:"\2190";font-size:.95rem;color:var(--slate-2)}
+      .nav-right .back::before{content:"\2190";font-size:.95rem;color:var(--ink)}
     }
 
     /* ===== THREAD ===== */
@@ -64,7 +65,7 @@
     @media(prefers-reduced-motion:reduce){.msg{transition:none}.msg.enter{transform:none}}
 
     .avatar{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-    .avatar.hc{background:var(--pine)}
+    .avatar.hc{background:var(--copper)}
     .avatar.me{background:var(--ink-2);border:1px solid var(--line)}
     .avatar.me span{font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;color:var(--slate-2)}
 
@@ -144,16 +145,16 @@
   <div class="nav-left">
     <a class="hm" href="https://hollismountain.com" title="Back to Hollis Mountain">
       <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-        <path d="M2 22 L9 8 L13 15 L17 4 L24 22 Z" stroke="#2d6a4f" stroke-width="1.4" stroke-linejoin="round"/>
-        <path d="M9 8 L11 11 L13 9" stroke="#0f1614" stroke-width="1.2" stroke-linejoin="round" opacity=".55"/>
+        <path d="M2 22 L9 8 L13 15 L17 4 L24 22 Z" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M9 8 L11 11 L13 9" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" opacity=".55"/>
       </svg>
       <span class="wm">Hollis Mountain</span>
     </a>
     <span class="nav-div"></span>
     <span class="hc-ctx">
       <svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-        <path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#2d6a4f" stroke-width="1.6" stroke-linejoin="round"/>
-        <path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#2d6a4f" stroke="#2d6a4f" stroke-width="1" stroke-linejoin="round"/>
+        <path d="M2 23 L8 11 L12 17 L17 6 L24 23 Z" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M17 6 L17 2 L22 3.5 L17 5 Z" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
       </svg>
       <span class="nm">High Camp</span>
     </span>
